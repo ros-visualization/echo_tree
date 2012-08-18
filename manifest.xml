@@ -1,0 +1,19 @@
+<package>
+  <description brief="EchoTree: Display word tree as user types">
+
+     EchoTree helps conversation with mute persons, who can type.
+     A statistically driven word tree visualization is visible to 
+     the voice enabled conversation partner P. The tree continuously
+     updates as the mute person M types on their screen. P can then
+     guess and call out what M might be wishing to type. The system
+     works for in-person conversations and over the telephone.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/echo_tree</url>
+
+</package>
+
+
