@@ -1,0 +1,139 @@
+Result of stringifying in JSON. This is what Python server
+must generate and send over the WebSocket wire:
+{
+    "word": "great",
+    "followWordObjs": [
+        {
+            "word": "keyboard",
+            "followWordObjs": [
+                {
+                    "word": "shortcut",
+                    "followWordObjs": [
+                        {
+                            "word": "lost",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "woods",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "failure",
+                    "followWordObjs": [
+                        {
+                            "word": "mode",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "option",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "cleaner",
+                    "followWordObjs": [
+                        {
+                            "word": "undocumented",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "acidic",
+                            "followWordObjs": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "word": "land",
+            "followWordObjs": [
+                {
+                    "word": "free",
+                    "followWordObjs": [
+                        {
+                            "word": "potatoes",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "wheeling",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "reform",
+                    "followWordObjs": [
+                        {
+                            "word": "school",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "attempt",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "dispute",
+                    "followWordObjs": [
+                        {
+                            "word": "defendant",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "allegations",
+                            "followWordObjs": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "word": "labor",
+            "followWordObjs": [
+                {
+                    "word": "movement",
+                    "followWordObjs": [
+                        {
+                            "word": "free",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "therapy",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "union",
+                    "followWordObjs": [
+                        {
+                            "word": "concerned",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "denied",
+                            "followWordObjs": []
+                        }
+                    ]
+                },
+                {
+                    "word": "relations",
+                    "followWordObjs": [
+                        {
+                            "word": "bad",
+                            "followWordObjs": []
+                        },
+                        {
+                            "word": "visit",
+                            "followWordObjs": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
