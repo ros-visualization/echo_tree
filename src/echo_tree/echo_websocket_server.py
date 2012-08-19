@@ -25,63 +25,63 @@ class Root(object):
         self.port = port
         self.scheme = 'wss' if ssl else 'ws'
 
-    @cherrypy.expose
-    def index(self):
-        return """<html>
-    <head>
-      <script type='application/javascript' src='/js/jquery-1.6.2.min.js'></script>
-      <script type='application/javascript'>
-        $(document).ready(function() {
-
-          websocket = '%(scheme)s://%(host)s:%(port)s/ws';
-          if (window.WebSocket) {
-            ws = new WebSocket(websocket);
-          }
-          else if (window.MozWebSocket) {
-            ws = MozWebSocket(websocket);
-          }
-          else {
-            console.log('WebSocket Not Supported');
-            return;
-          }
-
-          window.onbeforeunload = function(e) {
-            $('#chat').val($('#chat').val() + 'Bye bye...\\n');
-            ws.close(1000, '%(username)s left the room');
-                 
-            if(!e) e = window.event;
-            e.stopPropagation();
-            e.preventDefault();
-          };
-          ws.onmessage = function (evt) {
-             $('#chat').val($('#chat').val() + evt.data + '\\n');
-          };
-          ws.onopen = function() {
-             ws.send("%(username)s entered the room");
-          };
-          ws.onclose = function(evt) {
-             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\"\\n');  
-          };
-
-          $('#send').click(function() {
-             console.log($('#message').val());
-             ws.send('%(username)s: ' + $('#message').val());
-             $('#message').val("");
-             return false;
-          });
-        });
-      </script>
-    </head>
-    <body>
-    <form action='#' id='chatform' method='get'>
-      <textarea id='chat' cols='35' rows='10'></textarea>
-      <br />
-      <label for='message'>%(username)s: </label><input type='text' id='message' />
-      <input id='send' type='submit' value='Send' />
-      </form>
-    </body>
-    </html>
-    """ % {'username': "User%d" % random.randint(0, 100), 'host': self.host, 'port': self.port, 'scheme': self.scheme}
+#    @cherrypy.expose
+#    def index(self):
+#        return """<html>
+#    <head>
+#      <script type='application/javascript' src='/js/jquery-1.6.2.min.js'></script>
+#      <script type='application/javascript'>
+#        $(document).ready(function() {
+#
+#          websocket = '%(scheme)s://%(host)s:%(port)s/ws';
+#          if (window.WebSocket) {
+#            ws = new WebSocket(websocket);
+#          }
+#          else if (window.MozWebSocket) {
+#            ws = MozWebSocket(websocket);
+#          }
+#          else {
+#            console.log('WebSocket Not Supported');
+#            return;
+#          }
+#
+#          window.onbeforeunload = function(e) {
+#            $('#chat').val($('#chat').val() + 'Bye bye...\\n');
+#            ws.close(1000, '%(username)s left the room');
+#                 
+#            if(!e) e = window.event;
+#            e.stopPropagation();
+#            e.preventDefault();
+#          };
+#          ws.onmessage = function (evt) {
+#             $('#chat').val($('#chat').val() + evt.data + '\\n');
+#          };
+#          ws.onopen = function() {
+#             ws.send("%(username)s entered the room");
+#          };
+#          ws.onclose = function(evt) {
+#             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\"\\n');  
+#          };
+#
+#          $('#send').click(function() {
+#             console.log($('#message').val());
+#             ws.send('%(username)s: ' + $('#message').val());
+#             $('#message').val("");
+#             return false;
+#          });
+#        });
+#      </script>
+#    </head>
+#    <body>
+#    <form action='#' id='chatform' method='get'>
+#      <textarea id='chat' cols='35' rows='10'></textarea>
+#      <br />
+#      <label for='message'>%(username)s: </label><input type='text' id='message' />
+#      <input id='send' type='submit' value='Send' />
+#      </form>
+#    </body>
+#    </html>
+#    """ % {'username': "User%d" % random.randint(0, 100), 'host': self.host, 'port': self.port, 'scheme': self.scheme}
 
     @cherrypy.expose
     def ws(self):
@@ -96,7 +96,10 @@ if __name__ == '__main__':
 
     cherrypy.config.update({'server.socket_host': args.host,
                             'server.socket_port': args.port,
-                            'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))})
+                            'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'static')),
+                            'tools.staticfile.on = True'
+                            'tools.staticfile.filename' : "index.html"
+                            })
 
     if args.ssl:
         cherrypy.config.update({'server.ssl_certificate': './server.crt',
@@ -106,6 +109,13 @@ if __name__ == '__main__':
     cherrypy.tools.websocket = WebSocketTool()
 
     cherrypy.quickstart(Root(args.host, args.port, args.ssl), '', config={
+        '/'  : {
+            'tools.staticdir.root' : os.path.abspath(os.path.dirname(__file__))
+            },
+        '/static' : {
+            'tools.staticdir.on' : True,
+            'tools.staticdir.dir' : "static"
+            },               
         '/ws': {
             'tools.websocket.on': True,
             'tools.websocket.handler_cls': ChatWebSocketHandler
