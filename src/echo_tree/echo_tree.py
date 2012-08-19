@@ -9,6 +9,11 @@ from contextlib import contextmanager;
 from operator import itemgetter;
 from collections import OrderedDict;
 
+'''
+Module for generating word tree datastructures from an underlying
+database of co-occurrence data in a collection. Provides both 
+Python and JSON results.
+'''
 
 class WordDatabase(object):
     '''
