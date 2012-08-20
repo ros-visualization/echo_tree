@@ -137,3 +137,22 @@ must generate and send over the WebSocket wire:
         }
     ]
 }
+----------------------
+
+{"word": "echo", 
+ "followWordObjs": [
+	    		{"word": "chamber", 
+	    		 "followWordObjs": [
+	    		 		   {"word": "music", 
+	    				    "followWordObjs": []}, 
+	    				   {"word": "orchestra", 
+	    				    "followWordObjs": []}
+	    				   ]
+	    	        }, 
+	    		{"word": "measurement", 
+	    		 "followWordObjs": []
+	    		}, 
+	    		{"word": "deafening", 
+	    		 "followWordObjs": []}
+		  ]
+}

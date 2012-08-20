@@ -1,5 +1,6 @@
 #!/usr/bin/evn python
 
+# application/json
 
 # -*- coding: utf-8 -*-
 import argparse
@@ -110,11 +111,12 @@ if __name__ == '__main__':
 
     cherrypy.quickstart(Root(args.host, args.port, args.ssl), '', config={
         '/'  : {
-            'tools.staticdir.root' : os.path.abspath(os.path.dirname(__file__))
+            #'tools.staticdir.root' : os.path.abspath(os.path.dirname(__file__))
+            'tools.staticdir.root' : os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
             },
         '/static' : {
             'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : "static"
+            'tools.staticdir.dir' : ""
             },               
         '/ws': {
             'tools.websocket.on': True,

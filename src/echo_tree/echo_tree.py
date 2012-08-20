@@ -192,8 +192,8 @@ if __name__ == "__main__":
 #    # Cache works? (put breakpoint in getSortedFollowers try: statement to check):
 #    print explorer.getSortedFollowers('ant');
             
-    print explorer.makeWordTree('ant');
-    print explorer.makeWordTree('echo');
+#    print explorer.makeWordTree('ant');
+#    print explorer.makeWordTree('echo');
     jsonTree = explorer.makeJSONTree(explorer.makeWordTree('echo'));
     print jsonTree;
     
