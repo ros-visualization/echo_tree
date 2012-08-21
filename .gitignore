@@ -2,3 +2,4 @@
 .project
 .pydevproject
 cmake_install.cmake
+build/
