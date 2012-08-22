@@ -14,11 +14,11 @@ class EchoTreeServiceHandler(StreamRequestHandler):
     activeHandlers = {};
     activeHandlersChangeLock = Lock();
     
-    def __init__(self, requestSocket, clientAddress, requestServerObj):
-        StreamRequestHandler.__init__(self, requestSocket, clientAddress, requestServerObj);
-        self.requestSocket = requestSocket;
-        self.client_address = clientAddress;
-        self.requestServerObj = requestServerObj;
+#    def __init__(self, requestSocket, clientAddress, requestServerObj):
+#        StreamRequestHandler.__init__(self, requestSocket, clientAddress, requestServerObj);
+#        self.requestSocket = requestSocket;
+#        self.client_address = clientAddress;
+#        self.requestServerObj = requestServerObj;
 
     @staticmethod
     def notifyHandlersOfNewTree():
@@ -50,16 +50,18 @@ class EchoTreeServiceHandler(StreamRequestHandler):
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
         # Get the HTTP request header:
-        self.data = self.rfile.readlines();
+        #????****self.data = self.rfile.readlines();
         # Announce to remote browser that this will be a server event-sent
         # standing connection:
         self.wfile.write('Content-Type: text/event-stream\n' +\
                          'Content-Type: text/event-stream\n\n');
         # Our (optional) message ids will be <connectionStartDateTime>_<IDnum>
         self.connStartTime = time.strftime("%m%d%Y_%H:%M:%S");
-        self.msgID = -1;
+        self.msgID = 0;
         # Send the currently active JSON tree as the first response:
-        self.sendNewTree();
+        if not self.sendNewTree():
+            return;
+        
         while 1:
             # Wait for a new tree to arrive. The activeHandlers dict
             # contains our Event object:
@@ -69,28 +71,35 @@ class EchoTreeServiceHandler(StreamRequestHandler):
             # A new JSON tree arrived, and was installed by the 
             # EchoTreeUpdateListener. Lock access to that tree, and
             # send it to our browser:
-            try:
-                EchoTreeUpdateListener.treeAccessLock.acquire();
-                self.wfile.write();
-            except:
-                # Connection back to the browser is bad. Clean up and get out.
-                print "Connection to browser broken after message %s. Stopping service for that browser." % self.constructMsgID();
-                return;
-            finally:
-                EchoTreeUpdateListener.treeAccessLock.release();
-                EchoTreeServiceHandler.unRegisterEchoTreeServer(self);
             self.msgID += 1;
-            self.wfile.write("id: " + self.constructMsgID() + '\n');
-            EchoTreeUpdateListener.treeAccessLock.acquire();
-            try:
-                self.wfile.write('data: ' + EchoTreeUpdateListener.currentEchoTree);
-            except:
-                # Connection back to the browser is bad. Clean up and get out.
-                print "Connection to browser broken while attempting to write message %s. Stopping service for that browser." % self.constructMsgID();
+            if not self.sendNewTree():
                 return;
-            finally:
-                EchoTreeUpdateListener.treeAccessLock.release();
-                EchoTreeServiceHandler.unRegisterEchoTreeServer(self);
+            
+    def finish_request(self):
+        try:
+            StreamRequestHandler.finish_request();
+        except:
+            return;
+    def finish(self):
+        try:
+            StreamRequestHandler.finish();
+        except:
+            return;
+        
+    def sendNewTree(self):
+        try:
+            EchoTreeUpdateListener.treeAccessLock.acquire();
+            self.wfile.write("id: " + self.constructMsgID() + '\n');
+            self.wfile.write(EchoTreeUpdateListener.currentEchoTree);
+            self.wfile.flush();
+            return True;
+        except:
+            # Connection back to the browser is bad. Clean up and get out.
+            print "Connection to browser broken after message %s. Stopping service for that browser." % self.constructMsgID();
+            EchoTreeServiceHandler.unRegisterEchoTreeServer(self);
+            return False;
+        finally:
+            EchoTreeUpdateListener.treeAccessLock.release();
         
     def constructMsgID(self):
         return self.connStartTime + '_' + str(self.msgID);        
@@ -98,7 +107,7 @@ class EchoTreeServiceHandler(StreamRequestHandler):
 class EchoTreeUpdateListener(StreamRequestHandler):
     
     treeAccessLock = Lock(); 
-    currentEchoTree = 'null';
+    currentEchoTree = 'Initial tree\n';
     
     def __init__(self, requestSocket, clientAddress, requestServerObj):
         StreamRequestHandler.__init__(self, requestSocket, clientAddress, requestServerObj);
@@ -159,7 +168,7 @@ if __name__ == '__main__':
 
     # Activate the servers; they will keep running until you
     # interrupt the program with Ctrl-C
-    SocketServerThreadStarter(echoTreeUpdateReceiver).run();
+    #SocketServerThreadStarter(echoTreeUpdateReceiver).run();
     SocketServerThreadStarter(echoTreeServer).run();
     
     while 1:
