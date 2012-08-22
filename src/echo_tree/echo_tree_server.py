@@ -5,20 +5,17 @@ import time;
 from threading import Event, Lock, Thread;
 from SocketServer import TCPServer, ThreadingMixIn, StreamRequestHandler;
 
-HOST = '';
+HOST = 'localhost';
 ECHO_TREE_GET_PORT = 5000;
 ECHO_TREE_NEW_ROOT_PORT = 5001;
+
+class EchoTreeService(ThreadingMixIn, TCPServer):
+    pass;
 
 class EchoTreeServiceHandler(StreamRequestHandler):
     
     activeHandlers = {};
     activeHandlersChangeLock = Lock();
-    
-#    def __init__(self, requestSocket, clientAddress, requestServerObj):
-#        StreamRequestHandler.__init__(self, requestSocket, clientAddress, requestServerObj);
-#        self.requestSocket = requestSocket;
-#        self.client_address = clientAddress;
-#        self.requestServerObj = requestServerObj;
 
     @staticmethod
     def notifyHandlersOfNewTree():
@@ -47,10 +44,6 @@ class EchoTreeServiceHandler(StreamRequestHandler):
         # the EchoTreeUpdateListener:
         EchoTreeServiceHandler.registerEchoTreeServer(self);
              
-        # self.rfile is a file-like object created by the handler;
-        # we can now use e.g. readline() instead of raw recv() calls
-        # Get the HTTP request header:
-        #????****self.data = self.rfile.readlines();
         # Announce to remote browser that this will be a server event-sent
         # standing connection:
         self.wfile.write('Content-Type: text/event-stream\n' +\
@@ -72,6 +65,9 @@ class EchoTreeServiceHandler(StreamRequestHandler):
             # EchoTreeUpdateListener. Lock access to that tree, and
             # send it to our browser:
             self.msgID += 1;
+            # Try to send the new tree. If send fails, the
+            # client served by this thread is likely no longer
+            # connected. Fine; just return, terminating this thread:
             if not self.sendNewTree():
                 return;
             
@@ -117,33 +113,17 @@ class EchoTreeUpdateListener(StreamRequestHandler):
         
     def handle(self):
         
-        print "Starting a JSON reception service...";
+        print "Receiving a new JSON EchoTree...";
         
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
         # Get the HTTP request header plus all of the tree:
         self.data = self.rfile.readlines();
-        # Find the empty line that separates the HTTP header from
-        # the JSON tree structure:
-        while 1:
-            dataLine = self.data.pop(0);
-            if len(dataLine) == 0:
-                # Found empty line after HTTP header:
-                # Ensure that there is at least one more
-                # line of data, which should be the start
-                # of a JSON structure, if this update is
-                # healthy:
-                if len(self.data) == 0:
-                    print "Bad echo tree update header. No data after header. Ignoring this update: %s" % str(self.data);
-                    return;
-                break;
-            
         # Protect the tree structure variable from multiple access
         # while we update it:
         EchoTreeUpdateListener.treeAccessLock.acquire();
         EchoTreeUpdateListener.currentEchoTree = '';
-        for jsonLine in self.data:
-            EchoTreeUpdateListener.currentEchoTree.append(jsonLine);
+        EchoTreeUpdateListener.currentEchoTree = ''.join(self.data);
         EchoTreeUpdateListener.treeAccessLock.release();
         # Signal to the new-tree-arrived event pushers that a new
         # jsonTree has arrived, and they should push it to their clients:
@@ -162,14 +142,16 @@ class SocketServerThreadStarter(Thread):
 if __name__ == '__main__':
 
     # Create the server for sending out new JSON trees
-    echoTreeServer = TCPServer((HOST, ECHO_TREE_GET_PORT), EchoTreeServiceHandler);
+    print "Starting EchoTree server: pushes new word trees to all clients connecting to %s." % str((HOST, ECHO_TREE_GET_PORT));
+    echoTreeServer = EchoTreeService((HOST, ECHO_TREE_GET_PORT), EchoTreeServiceHandler);
     # Create the service that accepts new JSON trees for distribution:
+    print "Starting EchoTree update server: accepts word trees submitted from clients connecting to %s." % str((HOST, ECHO_TREE_NEW_ROOT_PORT));
     echoTreeUpdateReceiver = TCPServer((HOST, ECHO_TREE_NEW_ROOT_PORT), EchoTreeUpdateListener); 
 
     # Activate the servers; they will keep running until you
     # interrupt the program with Ctrl-C
-    #SocketServerThreadStarter(echoTreeUpdateReceiver).run();
-    SocketServerThreadStarter(echoTreeServer).run();
+    SocketServerThreadStarter(echoTreeUpdateReceiver).start();
+    SocketServerThreadStarter(echoTreeServer).start();
     
     while 1:
         time.sleep(10);

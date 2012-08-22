@@ -2,12 +2,14 @@
 
 import os;
 import sys;
+import socket;
 
 import sqlite3;
 import json;
 from contextlib import contextmanager;
 from operator import itemgetter;
 from collections import OrderedDict;
+from echo_tree_server import ECHO_TREE_NEW_ROOT_PORT, HOST;
 
 '''
 Module for generating word tree datastructures from an underlying
@@ -147,6 +149,8 @@ class WordExplorer(object):
         @type maxDepth: int
         @param frequencyRankCutoff: 
         @type frequencyRankCutoff:
+        @return: new EchoTree Python structure
+        @rtype: string
         '''
         # Recursion bottomed out:
         if maxDepth == 0:
@@ -173,7 +177,28 @@ class WordExplorer(object):
         @type wordTree: {}
         '''
         return json.dumps(wordTree);
-              
+      
+    def pushEchoTreeToServer(self, jsonTreeStr):
+        '''
+        Attempts to connect to the Web server defined by the
+        imported HOST and ECHO_TREE_NEW_ROOT_PORT. If successful,
+        pushes the given JSON formatted tree to that server. The server will in turn
+        push the new tree to any interested clients. It is not an
+        error if the connection attempt to the Web server fails, 
+        
+        @param jsonTreeStr: EchoTree in JSON format
+        @type jsonTreeStr: string
+        @return: True if the update to the EchoTree server succeeded, else False;
+        '''
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+            sock.connect((HOST, ECHO_TREE_NEW_ROOT_PORT));
+            sock.sendall(treeStr);
+            sock.close();
+            return True
+        except:
+            return False;
+                
 # ----------------------------   Testing   ----------------
 
 if __name__ == "__main__":
@@ -196,5 +221,6 @@ if __name__ == "__main__":
 #    print explorer.makeWordTree('echo');
     jsonTree = explorer.makeJSONTree(explorer.makeWordTree('echo'));
     print jsonTree;
+    explorer.pushEchoTreeToServer(jsonTree);
     
         
