@@ -4,38 +4,49 @@ import os;
 import time;
 from threading import Event, Lock, Thread;
 from SocketServer import TCPServer, ThreadingMixIn, StreamRequestHandler;
+from SimpleHTTPServer import SimpleHTTPRequestHandler;
 
-HOST = 'localhost';
-ECHO_TREE_GET_PORT = 5000;
-ECHO_TREE_NEW_ROOT_PORT = 5001;
+#HOST = 'localhost';
+HOST = '';
+ECHO_TREE_SCRIPT_SERVER_PORT = 5000;
+ECHO_TREE_GET_PORT = 5001;
+ECHO_TREE_NEW_ROOT_PORT = 5002;
+
+TREE_EVENT_LISTEN_SCRIPT_NAME = "wordTreeListener.html";
 
 class EchoTreeService(ThreadingMixIn, TCPServer):
     pass;
 
-class EchoTreeServiceHandler(StreamRequestHandler):
+class EchoTreeNewTreeSubmissionService(ThreadingMixIn, TCPServer):
+    pass
+
+class EchoTreeClientScriptService(ThreadingMixIn, TCPServer):
+    pass
+
+class EchoTreeServiceHandler(SimpleHTTPRequestHandler):
     
-    activeHandlers = {};
+    activeHandlerEvents = {};
     activeHandlersChangeLock = Lock();
 
     @staticmethod
     def notifyHandlersOfNewTree():
-        for handlerKey in EchoTreeServiceHandler.activeHandlers.keys():
+        for handlerKey in EchoTreeServiceHandler.activeHandlerEvents.keys():
             # Set one handler's new-tree-arrived event object:
-            EchoTreeServiceHandler.activeHandlers[handlerKey].set();
+            EchoTreeServiceHandler.activeHandlerEvents[handlerKey].set();
     
     @staticmethod
     def registerEchoTreeServer(echoTreeServiceHandlerObj):
         EchoTreeServiceHandler.activeHandlersChangeLock.acquire();
-        EchoTreeServiceHandler.activeHandlers[echoTreeServiceHandlerObj] = Event();
+        EchoTreeServiceHandler.activeHandlerEvents[echoTreeServiceHandlerObj] = Event();
         EchoTreeServiceHandler.activeHandlersChangeLock.release();
         
     @staticmethod
     def unRegisterEchoTreeServer(echoTreeServiceHandlerObj):
         EchoTreeServiceHandler.activeHandlersChangeLock.acquire();        
-        EchoTreeServiceHandler.activeHandlers.pop(echoTreeServiceHandlerObj);
+        EchoTreeServiceHandler.activeHandlerEvents.pop(echoTreeServiceHandlerObj);
         EchoTreeServiceHandler.activeHandlersChangeLock.release();        
     
-    def handle(self):
+    def do_GET(self):
     
         print "Starting an event push service for " + str(self.client_address);
         
@@ -46,8 +57,11 @@ class EchoTreeServiceHandler(StreamRequestHandler):
              
         # Announce to remote browser that this will be a server event-sent
         # standing connection:
-        self.wfile.write('Content-Type: text/event-stream\n' +\
-                         'Content-Type: text/event-stream\n\n');
+        self.wfile.write('HTTP/1.1 200 OK\n' +\
+                         'Content-Type: text/event-stream\n' +\
+                         'Cache-Control: no-cache\n' +\
+                         '\n');
+        self.wfile.flush();
         # Our (optional) message ids will be <connectionStartDateTime>_<IDnum>
         self.connStartTime = time.strftime("%m%d%Y_%H:%M:%S");
         self.msgID = 0;
@@ -56,10 +70,15 @@ class EchoTreeServiceHandler(StreamRequestHandler):
             return;
         
         while 1:
-            # Wait for a new tree to arrive. The activeHandlers dict
+            # Wait for a new tree to arrive. The activeHandlerEvents dict
             # contains our Event object:
-            
-            EchoTreeServiceHandler.activeHandlers[self].wait();
+
+            try:            
+                EchoTreeServiceHandler.activeHandlerEvents[self].wait();
+            except KeyError:
+                # This server/client connection has failed, and the server
+                # unregistered itself.
+                return;
             
             # A new JSON tree arrived, and was installed by the 
             # EchoTreeUpdateListener. Lock access to that tree, and
@@ -68,8 +87,17 @@ class EchoTreeServiceHandler(StreamRequestHandler):
             # Try to send the new tree. If send fails, the
             # client served by this thread is likely no longer
             # connected. Fine; just return, terminating this thread:
-            if not self.sendNewTree():
-                return;
+            try:
+                if not self.sendNewTree():
+                    return;
+            finally:
+                try:
+                    EchoTreeServiceHandler.activeHandlerEvents[self].clear();
+                except KeyError:
+                    # This server/client connection has failed, and the server
+                    # unregistered itself.
+                    return;
+                
             
     def finish_request(self):
         try:
@@ -85,8 +113,10 @@ class EchoTreeServiceHandler(StreamRequestHandler):
     def sendNewTree(self):
         try:
             EchoTreeUpdateListener.treeAccessLock.acquire();
-            self.wfile.write("id: " + self.constructMsgID() + '\n');
-            self.wfile.write(EchoTreeUpdateListener.currentEchoTree);
+            newTreeMsg = 'id: ' + self.constructMsgID() + '\n' + 'data: ' + EchoTreeUpdateListener.currentEchoTree + '\n'; 
+            self.wfile.write(newTreeMsg);
+            #self.wfile.write('id: ' + self.msgID + '\n');
+            #self.wfile.write(EchoTreeUpdateListener.currentEchoTree + '\n');
             self.wfile.flush();
             return True;
         except:
@@ -129,29 +159,56 @@ class EchoTreeUpdateListener(StreamRequestHandler):
         # jsonTree has arrived, and they should push it to their clients:
         EchoTreeServiceHandler.notifyHandlersOfNewTree();
 
+class EchoTreeScriptRequestHandler(SimpleHTTPRequestHandler):
+    
+    def do_GET(request):
+        scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "scripts/" + TREE_EVENT_LISTEN_SCRIPT_NAME);
+        request.send_response(200)
+        reply =  "Content-type, text/html\n" +\
+                 "Content-Length:%s\n" % os.path.getsize(scriptPath) +\
+                 "Last-Modified:%s\n" % time.ctime(os.path.getmtime(scriptPath)) +\
+                 "Cache-Control:no-cache\n" +\
+                 "\n";
+
+        with open(scriptPath) as fileFD:
+            for line in fileFD:
+                reply += line;
+        request.wfile.write(reply);
+                
 class SocketServerThreadStarter(Thread):
     
-    def __init__(self, socketServerObj):
+    def __init__(self, socketServerClassName, host, port):
         super(SocketServerThreadStarter, self).__init__();
-        self.socketServerObj = socketServerObj;
+        self.socketServerClassName = socketServerClassName
+        self.host = host
+        self.port = port
+        
         
     def run(self):
-        self.socketServerObj.serve_forever();
+        try:
+            if self.socketServerClassName == 'EchoTreeService':
+                print "Starting EchoTree server %s: pushes new word trees to all connecting clients." % str((self.host, self.port));
+                EchoTreeService((self.host, self.port), EchoTreeServiceHandler).serve_forever();
+            elif self.socketServerClassName == 'EchoTreeNewTreeSubmissionService':
+                print "Starting EchoTree new tree submissions server %s: accepts word trees submitted from connecting clients." % str((self.host, self.port));            
+                EchoTreeNewTreeSubmissionService((self.host, self.port), EchoTreeUpdateListener).serve_forever();
+            elif self.socketServerClassName == 'EchoTreeClientScriptService':
+                print "Starting EchoTree script server %s: Returns one script that listens to the new-tree events in the browser." % str((self.host, self.port));
+                EchoTreeClientScriptService((self.host, self.port), EchoTreeScriptRequestHandler).serve_forever();
+            else:
+                raise ValueError("Service class %s is unknown." % self.socketServerClassName);
+        except Exception, e:
+            print "Exception: %s" % `e`
 
 
 if __name__ == '__main__':
 
     # Create the server for sending out new JSON trees
-    print "Starting EchoTree server: pushes new word trees to all clients connecting to %s." % str((HOST, ECHO_TREE_GET_PORT));
-    echoTreeServer = EchoTreeService((HOST, ECHO_TREE_GET_PORT), EchoTreeServiceHandler);
+    SocketServerThreadStarter('EchoTreeService', HOST, ECHO_TREE_GET_PORT).start();
     # Create the service that accepts new JSON trees for distribution:
-    print "Starting EchoTree update server: accepts word trees submitted from clients connecting to %s." % str((HOST, ECHO_TREE_NEW_ROOT_PORT));
-    echoTreeUpdateReceiver = TCPServer((HOST, ECHO_TREE_NEW_ROOT_PORT), EchoTreeUpdateListener); 
-
-    # Activate the servers; they will keep running until you
-    # interrupt the program with Ctrl-C
-    SocketServerThreadStarter(echoTreeUpdateReceiver).start();
-    SocketServerThreadStarter(echoTreeServer).start();
+    SocketServerThreadStarter('EchoTreeNewTreeSubmissionService', HOST, ECHO_TREE_NEW_ROOT_PORT).start();
+    # Create the service that serves out a small JS script that listens to the new-tree events:
+    SocketServerThreadStarter('EchoTreeClientScriptService', HOST, ECHO_TREE_SCRIPT_SERVER_PORT).start();
     
     while 1:
         time.sleep(10);

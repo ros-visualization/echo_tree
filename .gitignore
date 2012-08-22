@@ -3,3 +3,4 @@
 .pydevproject
 cmake_install.cmake
 build/
+*\.pyc

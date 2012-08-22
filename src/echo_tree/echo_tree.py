@@ -193,7 +193,7 @@ class WordExplorer(object):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
             sock.connect((HOST, ECHO_TREE_NEW_ROOT_PORT));
-            sock.sendall(treeStr);
+            sock.sendall(jsonTreeStr);
             sock.close();
             return True
         except:

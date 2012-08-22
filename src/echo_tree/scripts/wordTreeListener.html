@@ -8,14 +8,14 @@
 
       	// Create an EventSourceobject, passing it the name and
         // location of the server side script:
-        var source = new EventSource("http://mono.stanford.edu:5000");
+        var source = new EventSource("http://mono.stanford.edu:5001/");
 
         source.onopen = function () {
           connectionOpen(true);
         };
 
         source.onerror = function () {
-          connectionOpen(false);
+          alert("Error occurred. (Helpful message, isn't it?");
         };
 
         // For event types other than the default type (which we don't
@@ -25,7 +25,7 @@
         //source.addEventListener('uptime', updateUptime, false);
 
         source.onmessage = function (event) {
-           //alert(event.data);
+           alert(event.data);
            document.getElementById("newTree").innerHTML=event.data;
         };
       }
