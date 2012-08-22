@@ -89,10 +89,7 @@ class WordExplorer(object):
     Main class. Provides extraction of a frequency ordered JSON
     structure, given a source word and an underlying co-occurrence database.
     Python structures are recursive, as are the corresponding JSON structures:
-      WordTree :=
-        {"word" : <rootWord>,
-         "followWordObjs" : [WordTree1, WordTree2, ...]
-         }
+    WordTree := {"word" : <rootWord>,"followWordObjs" : [WordTree1, WordTree2, ...]}
     '''
     
     def __init__(self, dbPath):
@@ -147,8 +144,6 @@ class WordExplorer(object):
         @param maxDepth: How deep the tree should grow, that is how far along a 
                          word-follows chain the recursion should proceed.
         @type maxDepth: int
-        @param frequencyRankCutoff: 
-        @type frequencyRankCutoff:
         @return: new EchoTree Python structure
         @rtype: string
         '''
