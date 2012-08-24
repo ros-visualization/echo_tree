@@ -12,6 +12,7 @@ For ports, see constants below.
 
 import os;
 import time;
+import socket;
 from threading import Event, Lock, Thread;
 from SocketServer import TCPServer, ThreadingMixIn, StreamRequestHandler;
 from SimpleHTTPServer import SimpleHTTPRequestHandler;
@@ -256,7 +257,7 @@ class EchoTreeScriptRequestHandler(SimpleHTTPRequestHandler):
     That page contains instructions for requesting an event stream for
     new EchoTree instances from this server.
     '''
-    
+
     def do_GET(request):
         '''
         Hangles the HTTP GET request.
@@ -271,6 +272,7 @@ class EchoTreeScriptRequestHandler(SimpleHTTPRequestHandler):
         reply =  "Content-type, text/html\n" +\
                  "Content-Length:%s\n" % os.path.getsize(scriptPath) +\
                  "Last-Modified:%s\n" % time.ctime(os.path.getmtime(scriptPath)) +\
+                 "Access-Control-Allow-Origin: http://" + socket.getfqdn() + ":" + str(ECHO_TREE_GET_PORT) +\
                  "Cache-Control:no-cache\n" +\
                  "\n";
         # Add the HTML page to the header:
@@ -322,7 +324,10 @@ class SocketServerThreadStarter(Thread):
         except Exception, e:
             # Typically an exception is caught here that complains about 'socket in use'
             # Should avoid that by sensing busy socket and timing out:
-            print "Exception: %s. You need to try starting this service again. Socket busy condition will time out within 30 secs or so." % `e`
+            if e.errno == 98:
+                print "Exception: %s. You need to try starting this service again. Socket busy condition will time out within 30 secs or so." % `e`
+            else:
+                print `e`;
 
 
 if __name__ == '__main__':
