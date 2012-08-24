@@ -4,35 +4,28 @@
     <script type="text/javascript">
 
       // Check for browser support:
-      if(typeof(EventSource)!=="undefined") {
+      if(typeof(WebSocket)!=="undefined") {
 
-      	// Create an EventSourceobject, passing it the name and
-        // location of the server side script:
-        var source = new EventSource("http://mono.stanford.edu:5001/");
+      	// Create a WebSocket connected back to the EchoTree server 
+        // where this script came from:
+        var ws = new WebSocket("ws://mono.stanford.edu:5001");
 
-        source.onopen = function () {
-          connectionOpen(true);
+        ws.onopen = function () {
         };
 
-        source.onerror = function () {
+        ws.onerror = function () {
           alert("Error occurred. (Helpful message, isn't it?");
         };
 
-        // For event types other than the default type (which we don't
-        // have for now):
-        //source.addEventListener('connections', updateConnections, false);
-        //source.addEventListener('requests', updateRequests, false);
-        //source.addEventListener('uptime', updateUptime, false);
-
-        source.onmessage = function (event) {
+        ws.onmessage = function (event) {
            alert(event.data);
            document.getElementById("newTree").innerHTML=event.data;
         };
       }
 
       else {
-        // No server-sent events supported in this browser:
-      	document.getElementById("newTree").innerHTML="Whoops! Your browser doesn't receive server-sent events.";
+        // WebSockts not supported in this browser:
+      	document.getElementById("newTree").innerHTML="Whoops! Your browser doesn't support WebSockets.";
       }
 
     </script>

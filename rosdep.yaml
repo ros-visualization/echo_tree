@@ -1,13 +1,7 @@
-cherrypy:
+tornado:
   ubuntu:
-    lucid: python-cherrypy3
-    maverick: python-cherrypy3
-    natty: python-cherrypy3
-    oneiric: python-cherrypy3
-    precise: python-cherrypy3
-
-
-# Also need ws4py:
-#    o git clone git://github.com/Lawouach/WebSocket-for-Python.git
-#    o cd WebSocket-for-Python
-#    o sudo python setup.py install
+    lucid: python-tornado
+    maverick: python-tornado
+    natty: python-tornado
+    oneiric: python-tornado
+    precise: python-tornado
