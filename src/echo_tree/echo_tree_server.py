@@ -23,8 +23,7 @@ from tornado.httpserver import HTTPServer;
 HOST = 'mono.stanford.edu';
 ECHO_TREE_SCRIPT_SERVER_PORT = 5000;
 ECHO_TREE_GET_PORT = 5001;
-#ECHO_TREE_NEW_ROOT_PORT = 5002;
-ECHO_TREE_NEW_ROOT_PORT = 5001;
+ECHO_TREE_NEW_ROOT_PORT = 5002;
 
 SCRIPT_REQUEST_URI_PATH = r"/request_echo_tree_script";
 NEW_TREE_SUBMISSION_URI_PATH = r"/submit_new_echo_tree";
@@ -52,12 +51,24 @@ class EchoTreeService(WebSocketHandler):
     currentEchoTree = "";
     # Lock for changing the current EchoTree:
     currentEchoTreeLock = Lock();
+    
+    # try:
+    @staticmethod
+    def request_handler(request):
+        print "request_handler called";
+        
+    #try:
+    def do_GET(self):
+        print "do_GET called";
             
     def on_open(self):
         '''
         Invoked when browser accesses this server via ws://...
         Register this handler instance in the handler list. 
         '''
+        
+        print "Another browser subscribes to EchoTrees."
+        
         with EchoTreeService.activeHandlersChangeLock:
             EchoTreeService.activeHandlers.append(self);
         self.newEchoTreeEvent = Event();
@@ -104,16 +115,17 @@ class EchoTreeService(WebSocketHandler):
 # -----------------------------------------  Class for submission of new EchoTrees ---------------    
     
     
-class NewEchoTreeSubmissionService(WebSocketHandler):
+class NewEchoTreeSubmissionService(HTTPServer):
     '''
     Service for submitting a new JSON encoded EchoTree.
     Uses WebSocket to receive new JSON encoded EchoTrees.
     '''
     
-    def open(self):
-        print "New EchoTree about to be submitted.";
+    def _execute(self, transform):
+        pass;
     
-    def on_message(self, newJSONEchoTreeStr):
+    @staticmethod
+    def handle_request(request):
         '''
         Stores the incoming tree in EchoTreeService.currentEchoTree.
         Then raises NewEchoTreeSignal so that all EchoTree handlers' on_new_echo_tree()
@@ -121,7 +133,7 @@ class NewEchoTreeSubmissionService(WebSocketHandler):
         '''
         
         print "Receiving a new JSON EchoTree...";
-        
+        newJSONEchoTreeStr = request.body;
         with EchoTreeService.currentEchoTreeLock:
             EchoTreeService.currentEchoTree = newJSONEchoTreeStr;
             
@@ -134,7 +146,6 @@ class NewEchoTreeSubmissionService(WebSocketHandler):
         
         
 # --------------------  Request Handler Class for browsers requesting the JavaScript that knows to open an EchoTreeService connection ---------------
-
 class EchoTreeScriptRequestHandler(HTTPServer):
     '''
     Web service serving a single JavaScript containing HTML page.
@@ -159,11 +170,11 @@ class EchoTreeScriptRequestHandler(HTTPServer):
         # this request is not frequent. 
         scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "scripts/" + TREE_EVENT_LISTEN_SCRIPT_NAME);
         # Create the response and the HTML page string:
-        reply =  "HTTP/1.1 200 OK\n" +\
-                 "Content-type, text/html\n" +\
-                 "Content-Length:%s\n" % os.path.getsize(scriptPath) +\
-                 "Last-Modified:%s\n" % time.ctime(os.path.getmtime(scriptPath)) +\
-                 "\n";
+        reply =  "HTTP/1.1 200 OK\r\n" +\
+                 "Content-type, text/html\r\n" +\
+                 "Content-Length:%s\r\n" % os.path.getsize(scriptPath) +\
+                 "Last-Modified:%s\r\n" % time.ctime(os.path.getmtime(scriptPath)) +\
+                 "\r\n";
         # Add the HTML page to the header:
         with open(scriptPath) as fileFD:
             for line in fileFD:
@@ -201,17 +212,23 @@ class SocketServerThreadStarter(Thread):
                 print "Starting EchoTree server at port %d: pushes new word trees to all connecting clients." % self.port;
                 application = tornado.web.Application([(r"/", EchoTreeService)]);
                 application.listen(self.port);
-                tornado.ioloop.IOLoop.instance().start();
+                IOLoop.instance().start();
             elif self.socketServerClassName == 'NewEchoTreeSubmissionService':
                 print "Starting EchoTree new tree submissions server %d: accepts word trees submitted from connecting clients." % self.port;
-                application = tornado.web.Application([(r"/", NewEchoTreeSubmissionService)]);
-                application.listen(self.port);
-                tornado.ioloop.IOLoop.instance().start();
+                http_server = NewEchoTreeSubmissionService(NewEchoTreeSubmissionService.handle_request);
+                http_server.listen(self.port);
+                IOLoop.instance().start()
+#                application = tornado.web.Application([(r"/", NewEchoTreeSubmissionService)]);
+#                application.listen(self.port);
+#                tornado.ioloop.IOLoop.instance().start();
             elif self.socketServerClassName == 'EchoTreeScriptRequestHandler':
                 print "Starting EchoTree script server %d: Returns one script that listens to the new-tree events in the browser." % self.port;
-                httpServer = EchoTreeScriptRequestHandler();
-                httpServer.listen(self.port);
-                tornado.ioloop.IOLoop.instance().start();
+                http_server = EchoTreeScriptRequestHandler(EchoTreeScriptRequestHandler.handle_request);
+                http_server.listen(self.port);
+                IOLoop.instance().start();
+#                httpServer = EchoTreeScriptRequestHandler();
+#                httpServer.listen(self.port);
+#                IOLoop.instance().start();
             else:
                 raise ValueError("Service class %s is unknown." % self.socketServerClassName);
         except Exception, e:
@@ -235,16 +252,20 @@ if __name__ == '__main__':
 #    
 #    while 1:
 #        time.sleep(10);
+#    print "Starting EchoTree new tree submissions server %s: accepts word trees submitted from connecting clients." % "/submit_new_echo_tree";
+#    print "Starting EchoTree script server %s: Returns one script that listens to the new-tree events in the browser." % "/request_echo_tree_script";
+    # Create the service that accepts new JSON trees for distribution:
+    SocketServerThreadStarter('NewEchoTreeSubmissionService', ECHO_TREE_NEW_ROOT_PORT).start();
+    
+    # Create the service that serves out a small JS script that listens to the new-tree events:
+    SocketServerThreadStarter('EchoTreeScriptRequestHandler', ECHO_TREE_SCRIPT_SERVER_PORT).start();
+    
     print "Starting EchoTree server at port %s: pushes new word trees to all connecting clients." % "/subscribe_to_echo_trees";
-    print "Starting EchoTree new tree submissions server %s: accepts word trees submitted from connecting clients." % "/submit_new_echo_tree";
-    print "Starting EchoTree script server %s: Returns one script that listens to the new-tree events in the browser." % "/request_echo_tree_script";
-    application = tornado.web.Application([(SCRIPT_REQUEST_URI_PATH, EchoTreeService),
-                                           (NEW_TREE_SUBMISSION_URI_PATH, NewEchoTreeSubmissionService),
+    application = tornado.web.Application([(ECHO_TREE_SUBSCRIBE_PATH, EchoTreeService),
+#                                           (NEW_TREE_SUBMISSION_URI_PATH, NewEchoTreeSubmissionService),
 #                                           (SCRIPT_REQUEST_URI_PATH, EchoTreeScriptRequestHandler)
                                            ]);
-    application.listen(5001);
-    http_server = EchoTreeScriptRequestHandler(EchoTreeScriptRequestHandler.handle_request);
-    http_server.listen(5000);
-    tornado.ioloop.IOLoop.instance().start();
-                                          
+    application.listen(ECHO_TREE_GET_PORT);
+    
+    IOLoop.instance().start()                            
 
