@@ -10,6 +10,7 @@ from contextlib import contextmanager;
 from operator import itemgetter;
 from collections import OrderedDict;
 from echo_tree_server import ECHO_TREE_NEW_ROOT_PORT, HOST;
+from echo_tree_server import NEW_TREE_SUBMISSION_URI_PATH;
 
 '''
 Module for generating word tree datastructures from an underlying
@@ -188,7 +189,13 @@ class WordExplorer(object):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
             sock.connect((HOST, ECHO_TREE_NEW_ROOT_PORT));
-            sock.sendall(jsonTreeStr);
+            treeMsg = "POST " + NEW_TREE_SUBMISSION_URI_PATH + " HTTP/1.0\r\n" +\
+                      "User-Agent: EchoTree_PushTool\r\n" +\
+                      "Content-Type: application/json\r\n" +\
+                      "Content-Length: " + str(len(jsonTreeStr)) + "\r\n" +\
+                      "\r\n" +\
+                      jsonTreeStr;
+            sock.sendall(treeMsg);
             sock.close();
             return True
         except:
