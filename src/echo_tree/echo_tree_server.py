@@ -156,8 +156,6 @@ class NewEchoTreeSubmissionService(HTTPServer):
     Uses WebSocket to receive new JSON encoded EchoTrees.
     '''
     
-    wordExplorer = WordExplorer(DBPATH);
-    
 #    def __init__(self, requestHandler):
 #        super(NewEchoTreeSubmissionService, self).__init__(requestHandler);
 #        NewEchoTreeSubmissionService.wordExplorer = WordExplorer(DBPATH);
@@ -174,19 +172,36 @@ class NewEchoTreeSubmissionService(HTTPServer):
         '''
         
         print "Receiving a new root word from %s (%s)..." % (request.host, request.remote_ip);
-        rootWord = request.body;
-        newJSONEchoTreeStr = NewEchoTreeSubmissionService.wordExplorer.makeJSONTree(NewEchoTreeSubmissionService.wordExplorer.makeWordTree(rootWord));
-        
-        # Store the new tree in the appropriate EchoTreeService class variable:
-        with EchoTreeService.currentEchoTreeLock:
-            EchoTreeService.currentEchoTree = newJSONEchoTreeStr;
-            
-        # Signal to the new-tree-arrived event pushers that a new
-        # jsonTree has arrived, and they should push it to their clients:
-        EchoTreeService.notifyInterestedParties();
+        NewEchoTreeSubmissionService.TreeComputer.rootWord = request.body;
+        NewEchoTreeSubmissionService.TreeComputer.newWordEvent.set();
         
     def on_close(self):
         pass
+    
+    
+    class TreeComputer(Thread):
+        
+        rootWord = None;
+        newWordEvent = Event();
+        
+#        def __init__(self):
+#            super(NewEchoTreeSubmissionService.TreeComputer, self).__init__();
+            
+        
+        def run(self):
+            self.wordExplorer = WordExplorer(DBPATH);
+            while 1:
+                NewEchoTreeSubmissionService.TreeComputer.newWordEvent.wait();
+                newJSONEchoTreeStr = self.wordExplorer.makeJSONTree(self.wordExplorer.makeWordTree(NewEchoTreeSubmissionService.TreeComputer.rootWord));
+                
+                # Store the new tree in the appropriate EchoTreeService class variable:
+                with EchoTreeService.currentEchoTreeLock:
+                    EchoTreeService.currentEchoTree = newJSONEchoTreeStr;
+                    
+                # Signal to the new-tree-arrived event pushers that a new
+                # jsonTree has arrived, and they should push it to their clients:
+                EchoTreeService.notifyInterestedParties();
+                NewEchoTreeSubmissionService.TreeComputer.newWordEvent.clear();
         
 # --------------------  Request Handler Class for browsers requesting the JavaScript that knows to open an EchoTreeService connection ---------------
 class EchoTreeScriptRequestHandler(HTTPServer):
@@ -284,10 +299,13 @@ if __name__ == '__main__':
     # Create the service that serves out a small JS script that listens to the new-tree events:
     SocketServerThreadStarter('EchoTreeScriptRequestHandler', ECHO_TREE_SCRIPT_SERVER_PORT).start();
     
+    print "Starting TreeComputer thread: computes new tree from Web-submitted words, using echo_tree.";
+    NewEchoTreeSubmissionService.TreeComputer().start();    
+    
     print "Starting EchoTree server at port %s: pushes new word trees to all connecting clients." % "/subscribe_to_echo_trees";
     application = tornado.web.Application([(r"/subscribe_to_echo_trees", EchoTreeService),
                                            ]);
+                                           
     application.listen(ECHO_TREE_GET_PORT);
-    
     IOLoop.instance().start()                            
 
