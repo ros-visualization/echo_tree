@@ -4,3 +4,4 @@
 cmake_install.cmake
 build/
 *\.pyc
+src/echo_tree/QtCreatorFiles/echo_tree_push_tester/echo_tree_push_tester.pro.user

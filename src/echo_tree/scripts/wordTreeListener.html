@@ -8,7 +8,8 @@
 
       	// Create a WebSocket connected back to the EchoTree server 
         // where this script came from:
-        var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
+        //var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
+        var ws = new WebSocket("ws://duo:5001/subscribe_to_echo_trees");
 
         ws.onopen = function () {
         };
@@ -18,7 +19,7 @@
         };
 
         ws.onmessage = function (event) {
-           alert(event.data);
+           //alert(event.data);
            document.getElementById("newTree").innerHTML=event.data;
         };
       }
