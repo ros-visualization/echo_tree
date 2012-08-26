@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+export PYTHONPATH=../src/echo_tree:$PYTHONPATH
+epydoc -v ../src/echo_tree/*.py

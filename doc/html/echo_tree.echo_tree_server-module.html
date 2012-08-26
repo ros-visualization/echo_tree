@@ -95,42 +95,15 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="echo_tree.echo_tree_server.EchoTreeService-class.html" class="summary-name">EchoTreeService</a><br />
-      Top level service for server-push updates to clients.
+      Handles pushing new EchoTrees to browsers who display them.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="echo_tree.echo_tree_server.EchoTreeNewTreeSubmissionService-class.html" class="summary-name">EchoTreeNewTreeSubmissionService</a><br />
-      Top level service for submitting a new JSON encoded EchoTree.
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="echo_tree.echo_tree_server.EchoTreeClientScriptService-class.html" class="summary-name">EchoTreeClientScriptService</a><br />
-      Top level service for handing out a single script that knows how to
-        initiate a new-EchoTree even stream from the EchoTreeService to the
-        browser-based client that is pulling this script.
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="echo_tree.echo_tree_server.EchoTreeServiceHandler-class.html" class="summary-name">EchoTreeServiceHandler</a><br />
-      Handles details of calls to the EchoTreeService.
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="echo_tree.echo_tree_server.EchoTreeUpdateListener-class.html" class="summary-name">EchoTreeUpdateListener</a><br />
-      Instances of this class service a single incoming new-EchoTree 
-        submission, then die.
+        <a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService-class.html" class="summary-name">NewEchoTreeSubmissionService</a><br />
+      Service for submitting a new JSON encoded EchoTree.
     </td>
   </tr>
 <tr>
@@ -171,7 +144,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="HOST"></a><span class="summary-name">HOST</span> = <code title="''"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></code>
+        <a name="HOST"></a><span class="summary-name">HOST</span> = <code title="'duo'"><code class="variable-quote">'</code><code class="variable-string">duo</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
 <tr>
@@ -199,6 +172,35 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="echo_tree.echo_tree_server-module.html#DBPATH" class="summary-name">DBPATH</a> = <code title="'/home/paepcke/fuerte/stacks/echo_tree/src/echo_tree/Resources/testDb.\
+db'"><code class="variable-quote">'</code><code class="variable-string">/home/paepcke/fuerte/stacks/echo_tree/src/echo_tree/</code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SCRIPT_REQUEST_URI_PATH"></a><span class="summary-name">SCRIPT_REQUEST_URI_PATH</span> = <code title="'/request_echo_tree_script'"><code class="variable-quote">'</code><code class="variable-string">/request_echo_tree_script</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NEW_TREE_SUBMISSION_URI_PATH"></a><span class="summary-name">NEW_TREE_SUBMISSION_URI_PATH</span> = <code title="'/submit_new_echo_tree'"><code class="variable-quote">'</code><code class="variable-string">/submit_new_echo_tree</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ECHO_TREE_SUBSCRIBE_PATH"></a><span class="summary-name">ECHO_TREE_SUBSCRIBE_PATH</span> = <code title="'r/subscribe_to_echo_trees'"><code class="variable-quote">'</code><code class="variable-string">r/subscribe_to_echo_trees</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="TREE_EVENT_LISTEN_SCRIPT_NAME"></a><span class="summary-name">TREE_EVENT_LISTEN_SCRIPT_NAME</span> = <code title="'wordTreeListener.html'"><code class="variable-quote">'</code><code class="variable-string">wordTreeListener.html</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
@@ -210,6 +212,44 @@
     </td>
   </tr>
 </table>
+<!-- ==================== VARIABLES DETAILS ==================== -->
+<a name="section-VariablesDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-VariablesDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="DBPATH"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">DBPATH</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-quote">'</code><code class="variable-string">/home/paepcke/fuerte/stacks/echo_tree/src/echo_tree/Resources/testDb.</code><span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+<code class="variable-string">db</code><code class="variable-quote">'</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
@@ -236,7 +276,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Aug 22 15:26:41 2012
+    Generated by Epydoc 3.0.1 on Sun Aug 26 09:17:47 2012
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

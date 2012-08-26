@@ -58,15 +58,13 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class EchoTreeScriptRequestHandler</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-SocketServer.BaseRequestHandler --+            
-                                  |            
-  SocketServer.StreamRequestHandler --+        
-                                      |        
-  BaseHTTPServer.BaseHTTPRequestHandler --+    
-                                          |    
-  SimpleHTTPServer.SimpleHTTPRequestHandler --+
-                                              |
-                                             <strong class="uidshort">EchoTreeScriptRequestHandler</strong>
+               object --+        
+                        |        
+tornado.netutil.TCPServer --+    
+                            |    
+tornado.httpserver.HTTPServer --+
+                                |
+                               <strong class="uidshort">EchoTreeScriptRequestHandler</strong>
 </pre>
 
 <hr />
@@ -74,31 +72,6 @@ SocketServer.BaseRequestHandler --+
   page contains instructions for requesting an event stream for new 
   EchoTree instances from this server.</p>
 
-<!-- ==================== NESTED CLASSES ==================== -->
-<a name="section-NestedClasses"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Nested Classes</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-NestedClasses"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-  <tr>
-    <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>BaseHTTPServer.BaseHTTPRequestHandler</code></b>:
-      <code><a href="mimetools.Message-class.html">MessageClass</a></code>
-      </p>
-    </td>
-  </tr>
-</table>
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -116,16 +89,67 @@ SocketServer.BaseRequestHandler --+
     </table>
   </td>
 </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.httpserver.HTTPServer</code></b>:
+      <code>__init__</code>,
+      <code>handle_stream</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b>:
+      <code>add_socket</code>,
+      <code>add_sockets</code>,
+      <code>bind</code>,
+      <code>listen</code>,
+      <code>start</code>,
+      <code>stop</code>
+      </p>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b> (private):
+      <code>_handle_connection</code>
+      </p></div>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== STATIC METHODS ==================== -->
+<a name="section-StaticMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.EchoTreeScriptRequestHandler-class.html#do_GET" class="summary-sig-name">do_GET</a>(<span class="summary-sig-arg">request</span>)</span><br />
+          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.EchoTreeScriptRequestHandler-class.html#handle_request" class="summary-sig-name">handle_request</a>(<span class="summary-sig-arg">request</span>)</span><br />
       Hangles the HTTP GET request.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.do_GET">source&nbsp;code</a></span>
+            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.handle_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -133,53 +157,18 @@ SocketServer.BaseRequestHandler --+
       
     </td>
   </tr>
-  <tr>
-    <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>SimpleHTTPServer.SimpleHTTPRequestHandler</code></b>:
-      <code>copyfile</code>,
-      <code>do_HEAD</code>,
-      <code>guess_type</code>,
-      <code>list_directory</code>,
-      <code>send_head</code>,
-      <code>translate_path</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>BaseHTTPServer.BaseHTTPRequestHandler</code></b>:
-      <code>address_string</code>,
-      <code>date_time_string</code>,
-      <code>end_headers</code>,
-      <code>handle</code>,
-      <code>handle_one_request</code>,
-      <code>log_date_time_string</code>,
-      <code>log_error</code>,
-      <code>log_message</code>,
-      <code>log_request</code>,
-      <code>parse_request</code>,
-      <code>send_error</code>,
-      <code>send_header</code>,
-      <code>send_response</code>,
-      <code>version_string</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>SocketServer.StreamRequestHandler</code></b>:
-      <code>finish</code>,
-      <code>setup</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>SocketServer.BaseRequestHandler</code></b>:
-      <code>__init__</code>
-      </p>
-    </td>
-  </tr>
 </table>
-<!-- ==================== CLASS VARIABLES ==================== -->
-<a name="section-ClassVariables"></a>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="left"><span class="table-header">Properties</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-ClassVariables"
+         ><span class="options">[<a href="#section-Properties"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -188,25 +177,8 @@ SocketServer.BaseRequestHandler --+
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>SimpleHTTPServer.SimpleHTTPRequestHandler</code></b>:
-      <code>extensions_map</code>,
-      <code>server_version</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>BaseHTTPServer.BaseHTTPRequestHandler</code></b>:
-      <code>default_request_version</code>,
-      <code>error_content_type</code>,
-      <code>error_message_format</code>,
-      <code>monthname</code>,
-      <code>protocol_version</code>,
-      <code>responses</code>,
-      <code>sys_version</code>,
-      <code>weekdayname</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>SocketServer.StreamRequestHandler</code></b>:
-      <code>disable_nagle_algorithm</code>,
-      <code>rbufsize</code>,
-      <code>timeout</code>,
-      <code>wbufsize</code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
       </p>
     </td>
   </tr>
@@ -229,17 +201,18 @@ SocketServer.BaseRequestHandler --+
   </td>
 </tr>
 </table>
-<a name="do_GET"></a>
+<a name="handle_request"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">do_GET</span>(<span class="sig-arg">request</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">handle_request</span>(<span class="sig-arg">request</span>)</span>
+    <br /><em class="fname">Static Method</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.do_GET">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.handle_request">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -249,9 +222,6 @@ SocketServer.BaseRequestHandler --+
     <dd><ul class="nomargin-top">
         <li><strong class="pname"><code>request</code></strong> (???) - instance holding information about the request</li>
     </ul></dd>
-    <dt>Overrides:
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET
-    </dt>
   </dl>
 </td></tr></table>
 </div>
@@ -282,7 +252,7 @@ SocketServer.BaseRequestHandler --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Aug 22 15:26:41 2012
+    Generated by Epydoc 3.0.1 on Sun Aug 26 09:17:47 2012
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

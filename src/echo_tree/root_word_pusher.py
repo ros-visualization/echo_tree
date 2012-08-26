@@ -3,11 +3,12 @@
 
 import socket;
 
+from echo_tree_server import ECHO_TREE_NEW_ROOT_PORT;
 from echo_tree_server import NEW_TREE_SUBMISSION_URI_PATH;
 
 class RootWordPusher(object):
 
-    def __init__(self, serverHostNameOrIP, port=NEW_TREE_SUBMISSION_URI_PATH):
+    def __init__(self, serverHostNameOrIP, port=ECHO_TREE_NEW_ROOT_PORT):
         
         self.serverHostNameOrIP = serverHostNameOrIP;
         self.port = port;
@@ -15,13 +16,13 @@ class RootWordPusher(object):
     def pushEchoTreeToServer(self, rootWord):
         '''
         Attempts to connect to the Web server defined by the
-        imported HOST and NEW_TREE_SUBMISSION_URI_PATH. If successful,
+        imported HOST and ECHO_TREE_NEW_ROOT_PORT. If successful,
         pushes the given JSON formatted tree to that server. The server will in turn
         push the new tree to any interested clients. It is not an
         error if the connection attempt to the Web server fails, 
         
-        @param jsonTreeStr: EchoTree in JSON format
-        @type jsonTreeStr: string
+        @param rootWord: new root word from which an EchoTree will be constructed.
+        @type rootWord: string
         @return: None if the update to the EchoTree server succeeded, else an Exception object;
         '''
         try:

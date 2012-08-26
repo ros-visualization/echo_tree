@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>echo_tree.tester_gui</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="echo_tree-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="echo_tree-module.html">Package&nbsp;echo_tree</a> ::
+        Module&nbsp;tester_gui
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="echo_tree.tester_gui-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="echo_tree.tester_gui-module.html">Module echo_tree.tester_gui</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#!/usr/bin/env python</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sys</tt><tt class="py-op">;</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">os</tt><tt class="py-op">;</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">getopt</tt><tt class="py-op">;</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">python_qt_binding</tt> <tt class="py-keyword">import</tt> <tt class="py-name">QtBindingHelper</tt><tt class="py-op">;</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">QtGui</tt> <tt class="py-keyword">import</tt> <tt class="py-name">QApplication</tt><tt class="py-op">,</tt> <tt class="py-name">QMainWindow</tt><tt class="py-op">,</tt> <tt class="py-name">QWidget</tt><tt class="py-op">,</tt> <tt class="py-name">QErrorMessage</tt><tt class="py-op">,</tt> <tt class="py-name">QMessageBox</tt><tt class="py-op">;</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-0" class="py-name" targets="Module echo_tree.root_word_pusher=echo_tree.root_word_pusher-module.html"><a title="echo_tree.root_word_pusher" class="py-name" href="#" onclick="return doclink('link-0', 'root_word_pusher', 'link-0');">root_word_pusher</a></tt> <tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Class echo_tree.root_word_pusher.RootWordPusher=echo_tree.root_word_pusher.RootWordPusher-class.html"><a title="echo_tree.root_word_pusher.RootWordPusher" class="py-name" href="#" onclick="return doclink('link-1', 'RootWordPusher', 'link-1');">RootWordPusher</a></tt><tt class="py-op">;</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-2" class="py-name" targets="Module echo_tree.echo_tree_server=echo_tree.echo_tree_server-module.html"><a title="echo_tree.echo_tree_server" class="py-name" href="#" onclick="return doclink('link-2', 'echo_tree_server', 'link-2');">echo_tree_server</a></tt> <tt class="py-keyword">import</tt> <tt id="link-3" class="py-name" targets="Variable echo_tree.echo_tree_server.ECHO_TREE_NEW_ROOT_PORT=echo_tree.echo_tree_server-module.html#ECHO_TREE_NEW_ROOT_PORT"><a title="echo_tree.echo_tree_server.ECHO_TREE_NEW_ROOT_PORT" class="py-name" href="#" onclick="return doclink('link-3', 'ECHO_TREE_NEW_ROOT_PORT', 'link-3');">ECHO_TREE_NEW_ROOT_PORT</a></tt><tt class="py-op">;</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt id="link-4" class="py-name" targets="Variable echo_tree.tester_gui.GUI_PATH=echo_tree.tester_gui-module.html#GUI_PATH"><a title="echo_tree.tester_gui.GUI_PATH" class="py-name" href="#" onclick="return doclink('link-4', 'GUI_PATH', 'link-4');">GUI_PATH</a></tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">dirname</tt><tt class="py-op">(</tt><tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">realpath</tt><tt class="py-op">(</tt><tt class="py-name">__file__</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-string">"QtCreatorFiles/echo_tree_push_tester/wordpushergui.ui"</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># ---------------------------------------------  Class WordPusherGui ---------------------</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"> </tt>
+<a name="DialogService"></a><div id="DialogService-def"><a name="L17"></a><tt class="py-lineno"> 17</tt> <a class="py-toggle" href="#" id="DialogService-toggle" onclick="return toggle('DialogService');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="echo_tree.tester_gui.DialogService-class.html">DialogService</a><tt class="py-op">(</tt><tt class="py-base-class">QWidget</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="DialogService-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="DialogService-expanded"><a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line">    <tt class="py-comment">#----------------------------------</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line">    <tt class="py-comment"># Initializer</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line">    <tt class="py-comment">#--------------</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"> </tt>
+<a name="DialogService.__init__"></a><div id="DialogService.__init__-def"><a name="L23"></a><tt class="py-lineno"> 23</tt> <a class="py-toggle" href="#" id="DialogService.__init__-toggle" onclick="return toggle('DialogService.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.DialogService-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">parent</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="DialogService.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DialogService.__init__-expanded"><a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-5" class="py-name" targets="Class echo_tree.tester_gui.DialogService=echo_tree.tester_gui.DialogService-class.html"><a title="echo_tree.tester_gui.DialogService" class="py-name" href="#" onclick="return doclink('link-5', 'DialogService', 'link-5');">DialogService</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method echo_tree.echo_tree.WordDatabase.__init__()=echo_tree.echo_tree.WordDatabase-class.html#__init__,Method echo_tree.echo_tree.WordExplorer.__init__()=echo_tree.echo_tree.WordExplorer-class.html#__init__,Method echo_tree.echo_tree.WordFollower.__init__()=echo_tree.echo_tree.WordFollower-class.html#__init__,Method echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread.__init__()=echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread-class.html#__init__,Method echo_tree.echo_tree_server.EchoTreeService.__init__()=echo_tree.echo_tree_server.EchoTreeService-class.html#__init__,Method echo_tree.echo_tree_server.SocketServerThreadStarter.__init__()=echo_tree.echo_tree_server.SocketServerThreadStarter-class.html#__init__,Method echo_tree.root_word_pusher.RootWordPusher.__init__()=echo_tree.root_word_pusher.RootWordPusher-class.html#__init__,Method echo_tree.tester_cli.WordPusherCLI.__init__()=echo_tree.tester_cli.WordPusherCLI-class.html#__init__,Method echo_tree.tester_gui.DialogService.__init__()=echo_tree.tester_gui.DialogService-class.html#__init__,Method echo_tree.tester_gui.WordPusherGui.__init__()=echo_tree.tester_gui.WordPusherGui-class.html#__init__"><a title="echo_tree.echo_tree.WordDatabase.__init__
+echo_tree.echo_tree.WordExplorer.__init__
+echo_tree.echo_tree.WordFollower.__init__
+echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread.__init__
+echo_tree.echo_tree_server.EchoTreeService.__init__
+echo_tree.echo_tree_server.SocketServerThreadStarter.__init__
+echo_tree.root_word_pusher.RootWordPusher.__init__
+echo_tree.tester_cli.WordPusherCLI.__init__
+echo_tree.tester_gui.DialogService.__init__
+echo_tree.tester_gui.WordPusherGui.__init__" class="py-name" href="#" onclick="return doclink('link-6', '__init__', 'link-6');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-name">parent</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">         </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-comment"># All-purpose error popup message:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line">        <tt class="py-comment"># Used by self.showErrorMsgByErrorCode(&lt;errorCode&gt;), </tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">        <tt class="py-comment"># or self.showErrorMsg(&lt;string&gt;). Returns a</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">        <tt class="py-comment"># QErrorMessage without parent, but with QWindowFlags set</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">            <tt class="py-comment"># properly to be a dialog popup box:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">errorMsgPopup</tt> <tt class="py-op">=</tt> <tt class="py-name">QErrorMessage</tt><tt class="py-op">.</tt><tt class="py-name">qtHandler</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">        <tt class="py-comment"># Re-parent the popup, retaining the window flags set</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">        <tt class="py-comment"># by the qtHandler:</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">errorMsgPopup</tt><tt class="py-op">.</tt><tt class="py-name">setParent</tt><tt class="py-op">(</tt><tt class="py-name">parent</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">errorMsgPopup</tt><tt class="py-op">.</tt><tt class="py-name">windowFlags</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">        <tt class="py-comment">#self.errorMsgPopup.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">infoMsg</tt> <tt class="py-op">=</tt> <tt class="py-name">QMessageBox</tt><tt class="py-op">(</tt><tt class="py-name">parent</tt><tt class="py-op">=</tt><tt class="py-name">parent</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">        <tt class="py-comment">#self.infoMsg.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">     </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line">    <tt class="py-comment">#----------------------------------</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">    <tt class="py-comment"># showErrorMsg</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">    <tt class="py-comment">#--------------</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">    <tt class="py-name">QErrorMessage</tt> </tt>
+<a name="DialogService.showErrorMsg"></a><div id="DialogService.showErrorMsg-def"><a name="L43"></a><tt class="py-lineno"> 43</tt> <a class="py-toggle" href="#" id="DialogService.showErrorMsg-toggle" onclick="return toggle('DialogService.showErrorMsg');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.DialogService-class.html#showErrorMsg">showErrorMsg</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt><tt class="py-param">errMsg</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="DialogService.showErrorMsg-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DialogService.showErrorMsg-expanded"><a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">        <tt class="py-docstring">'''</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"><tt class="py-docstring">        Given a string, pop up an error dialog.</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line"><tt class="py-docstring">        @param errMsg: The message</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-docstring">        @type errMsg: string</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">errorMsgPopup</tt><tt class="py-op">.</tt><tt class="py-name">showMessage</tt><tt class="py-op">(</tt><tt class="py-name">errMsg</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">     </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">    <tt class="py-comment">#----------------------------------</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">    <tt class="py-comment"># showInfoMsg </tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">    <tt class="py-comment">#--------------</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="DialogService.showInfoMsg"></a><div id="DialogService.showInfoMsg-def"><a name="L55"></a><tt class="py-lineno"> 55</tt> <a class="py-toggle" href="#" id="DialogService.showInfoMsg-toggle" onclick="return toggle('DialogService.showInfoMsg');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.DialogService-class.html#showInfoMsg">showInfoMsg</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">text</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="DialogService.showInfoMsg-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DialogService.showInfoMsg-expanded"><a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">infoMsg</tt><tt class="py-op">.</tt><tt class="py-name">setText</tt><tt class="py-op">(</tt><tt class="py-name">text</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">infoMsg</tt><tt class="py-op">.</tt><tt class="py-name">exec_</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt>         </tt>
+</div></div><a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line"> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line"><tt class="py-comment"># ---------------------------------------------  Class WordPusherGui ---------------------</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line"> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line"> </tt>
+<a name="WordPusherGui"></a><div id="WordPusherGui-def"><a name="L62"></a><tt class="py-lineno"> 62</tt> <a class="py-toggle" href="#" id="WordPusherGui-toggle" onclick="return toggle('WordPusherGui');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="echo_tree.tester_gui.WordPusherGui-class.html">WordPusherGui</a><tt class="py-op">(</tt><tt class="py-base-class">QMainWindow</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WordPusherGui-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="WordPusherGui-expanded"><a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">     </tt>
+<a name="WordPusherGui.__init__"></a><div id="WordPusherGui.__init__-def"><a name="L64"></a><tt class="py-lineno"> 64</tt> <a class="py-toggle" href="#" id="WordPusherGui.__init__-toggle" onclick="return toggle('WordPusherGui.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.WordPusherGui-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">serverAddr</tt><tt class="py-op">,</tt> <tt class="py-param">port</tt><tt class="py-op">=</tt><tt id="link-7" class="py-name"><a title="echo_tree.echo_tree_server.ECHO_TREE_NEW_ROOT_PORT" class="py-name" href="#" onclick="return doclink('link-7', 'ECHO_TREE_NEW_ROOT_PORT', 'link-3');">ECHO_TREE_NEW_ROOT_PORT</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WordPusherGui.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WordPusherGui.__init__-expanded"><a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-8" class="py-name" targets="Class echo_tree.tester_gui.WordPusherGui=echo_tree.tester_gui.WordPusherGui-class.html"><a title="echo_tree.tester_gui.WordPusherGui" class="py-name" href="#" onclick="return doclink('link-8', 'WordPusherGui', 'link-8');">WordPusherGui</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name"><a title="echo_tree.echo_tree.WordDatabase.__init__
+echo_tree.echo_tree.WordExplorer.__init__
+echo_tree.echo_tree.WordFollower.__init__
+echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread.__init__
+echo_tree.echo_tree_server.EchoTreeService.__init__
+echo_tree.echo_tree_server.SocketServerThreadStarter.__init__
+echo_tree.root_word_pusher.RootWordPusher.__init__
+echo_tree.tester_cli.WordPusherCLI.__init__
+echo_tree.tester_gui.DialogService.__init__
+echo_tree.tester_gui.WordPusherGui.__init__" class="py-name" href="#" onclick="return doclink('link-9', '__init__', 'link-6');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">         </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">serverAddr</tt> <tt class="py-op">=</tt> <tt class="py-name">serverAddr</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">port</tt> <tt class="py-op">=</tt> <tt class="py-name">port</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">         </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pusher</tt> <tt class="py-op">=</tt> <tt id="link-10" class="py-name"><a title="echo_tree.root_word_pusher.RootWordPusher" class="py-name" href="#" onclick="return doclink('link-10', 'RootWordPusher', 'link-1');">RootWordPusher</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">serverAddr</tt><tt class="py-op">,</tt> <tt class="py-name">port</tt><tt class="py-op">=</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">port</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">         </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">ui</tt> <tt class="py-op">=</tt> <tt class="py-name">QtBindingHelper</tt><tt class="py-op">.</tt><tt class="py-name">loadUi</tt><tt class="py-op">(</tt><tt id="link-11" class="py-name"><a title="echo_tree.tester_gui.GUI_PATH" class="py-name" href="#" onclick="return doclink('link-11', 'GUI_PATH', 'link-4');">GUI_PATH</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">dialogService</tt> <tt class="py-op">=</tt> <tt id="link-12" class="py-name"><a title="echo_tree.tester_gui.DialogService" class="py-name" href="#" onclick="return doclink('link-12', 'DialogService', 'link-5');">DialogService</a></tt><tt class="py-op">(</tt><tt class="py-name">parent</tt><tt class="py-op">=</tt><tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name" targets="Method echo_tree.tester_gui.WordPusherGui.connectWidgets()=echo_tree.tester_gui.WordPusherGui-class.html#connectWidgets"><a title="echo_tree.tester_gui.WordPusherGui.connectWidgets" class="py-name" href="#" onclick="return doclink('link-13', 'connectWidgets', 'link-13');">connectWidgets</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">show</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">         </tt>
+<a name="WordPusherGui.connectWidgets"></a><div id="WordPusherGui.connectWidgets-def"><a name="L77"></a><tt class="py-lineno"> 77</tt> <a class="py-toggle" href="#" id="WordPusherGui.connectWidgets-toggle" onclick="return toggle('WordPusherGui.connectWidgets');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.WordPusherGui-class.html#connectWidgets">connectWidgets</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WordPusherGui.connectWidgets-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WordPusherGui.connectWidgets-expanded"><a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">        <tt class="py-comment">#self.wordField.textChanged.connect(self.wordFieldAction);</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">submitButton</tt><tt class="py-op">.</tt><tt class="py-name">clicked</tt><tt class="py-op">.</tt><tt class="py-name">connect</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Method echo_tree.tester_gui.WordPusherGui.submitAction()=echo_tree.tester_gui.WordPusherGui-class.html#submitAction"><a title="echo_tree.tester_gui.WordPusherGui.submitAction" class="py-name" href="#" onclick="return doclink('link-14', 'submitAction', 'link-14');">submitAction</a></tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">        <tt class="py-comment">#self.treeDisplayField</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">     </tt>
+<a name="WordPusherGui.submitAction"></a><div id="WordPusherGui.submitAction-def"><a name="L82"></a><tt class="py-lineno"> 82</tt> <a class="py-toggle" href="#" id="WordPusherGui.submitAction-toggle" onclick="return toggle('WordPusherGui.submitAction');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="echo_tree.tester_gui.WordPusherGui-class.html#submitAction">submitAction</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WordPusherGui.submitAction-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WordPusherGui.submitAction-expanded"><a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-name">word</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">wordField</tt><tt class="py-op">.</tt><tt class="py-name">toPlainText</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">word</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt><tt class="py-op">:</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">dialogService</tt><tt class="py-op">.</tt><tt id="link-15" class="py-name" targets="Method echo_tree.tester_gui.DialogService.showErrorMsg()=echo_tree.tester_gui.DialogService-class.html#showErrorMsg"><a title="echo_tree.tester_gui.DialogService.showErrorMsg" class="py-name" href="#" onclick="return doclink('link-15', 'showErrorMsg', 'link-15');">showErrorMsg</a></tt><tt class="py-op">(</tt><tt class="py-string">"Enter a single word in the 'Word' textbox before clicking New Tree"</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt><tt class="py-op">;</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">        <tt class="py-name">result</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pusher</tt><tt class="py-op">.</tt><tt id="link-16" class="py-name" targets="Method echo_tree.root_word_pusher.RootWordPusher.pushEchoTreeToServer()=echo_tree.root_word_pusher.RootWordPusher-class.html#pushEchoTreeToServer"><a title="echo_tree.root_word_pusher.RootWordPusher.pushEchoTreeToServer" class="py-name" href="#" onclick="return doclink('link-16', 'pushEchoTreeToServer', 'link-16');">pushEchoTreeToServer</a></tt><tt class="py-op">(</tt><tt class="py-name">word</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">result</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">            <tt class="py-comment"># Error:</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">dialogService</tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="echo_tree.tester_gui.DialogService.showErrorMsg" class="py-name" href="#" onclick="return doclink('link-17', 'showErrorMsg', 'link-15');">showErrorMsg</a></tt><tt class="py-op">(</tt><tt class="py-op">`</tt><tt class="py-name">result</tt><tt class="py-op">`</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div></div><a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">         </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">     </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt class="py-name">__name__</tt> <tt class="py-op">==</tt> <tt class="py-string">'__main__'</tt><tt class="py-op">:</tt>     </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">     </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">    <tt class="py-name">usage</tt> <tt class="py-op">=</tt> <tt class="py-string">"Usage: tester_gui [{-p | --port} echoTreeServerWordSubmissionPort] &lt;echoTreeServerName&gt;"</tt><tt class="py-op">;</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">     </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">    <tt class="py-name">thePort</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt><tt class="py-op">;</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">    <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-name">opts</tt><tt class="py-op">,</tt> <tt class="py-name">args</tt> <tt class="py-op">=</tt> <tt class="py-name">getopt</tt><tt class="py-op">.</tt><tt class="py-name">getopt</tt><tt class="py-op">(</tt><tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">argv</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">:</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-string">"hp:"</tt><tt class="py-op">,</tt> <tt class="py-op">[</tt><tt class="py-string">'help='</tt><tt class="py-op">,</tt> <tt class="py-string">'port='</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">    <tt class="py-keyword">except</tt> <tt class="py-name">getopt</tt><tt class="py-op">.</tt><tt class="py-name">GetoptError</tt><tt class="py-op">,</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-comment"># print help information and exit:</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err</tt><tt class="py-op">)</tt> <tt class="py-comment"># will print something like "option -a not recognized"</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-name">usage</tt><tt class="py-op">;</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> <tt class="py-op">!=</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-name">usage</tt><tt class="py-op">;</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-number">2</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">option</tt><tt class="py-op">,</tt> <tt class="py-name">arg</tt> <tt class="py-keyword">in</tt> <tt class="py-name">opts</tt><tt class="py-op">:</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">option</tt> <tt class="py-op">==</tt> <tt class="py-string">"-p"</tt> <tt class="py-keyword">or</tt> <tt class="py-name">option</tt> <tt class="py-op">==</tt> <tt class="py-string">'--port'</tt><tt class="py-op">:</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">            <tt class="py-name">thePort</tt> <tt class="py-op">=</tt> <tt class="py-name">arg</tt><tt class="py-op">;</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">        <tt class="py-keyword">elif</tt> <tt class="py-name">option</tt> <tt class="py-keyword">in</tt> <tt class="py-op">(</tt><tt class="py-string">"-h"</tt><tt class="py-op">,</tt> <tt class="py-string">"--help"</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-name">usage</tt><tt class="py-op">;</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">            <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">            <tt class="py-keyword">assert</tt> <tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-string">"unhandled option"</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line"> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">    <tt class="py-name">serverAddr</tt> <tt class="py-op">=</tt> <tt class="py-name">args</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">;</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">     </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">    <tt class="py-name">app</tt> <tt class="py-op">=</tt> <tt class="py-name">QApplication</tt><tt class="py-op">(</tt><tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">argv</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">thePort</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">        <tt class="py-name">wordPusher</tt> <tt class="py-op">=</tt> <tt id="link-18" class="py-name"><a title="echo_tree.tester_gui.WordPusherGui" class="py-name" href="#" onclick="return doclink('link-18', 'WordPusherGui', 'link-8');">WordPusherGui</a></tt><tt class="py-op">(</tt><tt class="py-name">serverAddr</tt><tt class="py-op">,</tt> <tt class="py-name">port</tt><tt class="py-op">=</tt><tt class="py-name">thePort</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">        <tt class="py-name">wordPusher</tt> <tt class="py-op">=</tt> <tt id="link-19" class="py-name"><a title="echo_tree.tester_gui.WordPusherGui" class="py-name" href="#" onclick="return doclink('link-19', 'WordPusherGui', 'link-8');">WordPusherGui</a></tt><tt class="py-op">(</tt><tt class="py-name">serverAddr</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">    <tt class="py-name">app</tt><tt class="py-op">.</tt><tt class="py-name">exec_</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">    <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="echo_tree-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Sun Aug 26 09:17:47 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

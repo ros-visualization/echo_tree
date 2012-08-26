@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>echo_tree.echo_tree.WordFollower</title>
+  <title>echo_tree.echo_tree_server.NewEchoTreeSubmissionService</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -38,8 +38,8 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="echo_tree-module.html">Package&nbsp;echo_tree</a> ::
-        <a href="echo_tree.echo_tree-module.html">Module&nbsp;echo_tree</a> ::
-        Class&nbsp;WordFollower
+        <a href="echo_tree.echo_tree_server-module.html">Module&nbsp;echo_tree_server</a> ::
+        Class&nbsp;NewEchoTreeSubmissionService
       </span>
     </td>
     <td>
@@ -49,25 +49,53 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="echo_tree.echo_tree.WordFollower-class.html"
+            >]&nbsp;|&nbsp;<a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class WordFollower</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class NewEchoTreeSubmissionService</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-object --+
-         |
-        <strong class="uidshort">WordFollower</strong>
+               object --+        
+                        |        
+tornado.netutil.TCPServer --+    
+                            |    
+tornado.httpserver.HTTPServer --+
+                                |
+                               <strong class="uidshort">NewEchoTreeSubmissionService</strong>
 </pre>
 
 <hr />
-<p>Provides a 'with' facility for database cursors. Used by methods of 
-  class WordExplorer to treat db cursors as tuple generators that close the
-  cursor even after exceptions. See Python contextmanager.</p>
+<p>Service for submitting a new JSON encoded EchoTree. Uses WebSocket to 
+  receive new JSON encoded EchoTrees.</p>
 
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer-class.html" class="summary-name">TreeComputer</a>
+    </td>
+  </tr>
+</table>
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -91,50 +119,9 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree.WordFollower-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">db</span>,
-        <span class="summary-sig-arg">word</span>)</span><br />
-      Provides a tuple generator, given a WordDatabase instance that 
-      accesses a word co-occurrence file, and a root word.</td>
+          <td><span class="summary-sig"><a name="on_close"></a><span class="summary-sig-name">on_close</span>(<span class="summary-sig-arg">self</span>)</span></td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__init__">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">sqlite3.cursor</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree.WordFollower-class.html#__enter__" class="summary-sig-name">__enter__</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Method required by contextmanager.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__enter__">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree.WordFollower-class.html#__exit__" class="summary-sig-name">__exit__</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">excType</span>,
-        <span class="summary-sig-arg">excValue</span>,
-        <span class="summary-sig-arg">traceback</span>)</span><br />
-      Method required by contextmanager.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__exit__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.on_close">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -144,6 +131,21 @@ object --+
   </tr>
   <tr>
     <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.httpserver.HTTPServer</code></b>:
+      <code>__init__</code>,
+      <code>handle_stream</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b>:
+      <code>add_socket</code>,
+      <code>add_sockets</code>,
+      <code>bind</code>,
+      <code>listen</code>,
+      <code>start</code>,
+      <code>stop</code>
+      </p>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b> (private):
+      <code>_handle_connection</code>
+      </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
       <code>__format__</code>,
@@ -158,6 +160,42 @@ object --+
       <code>__str__</code>,
       <code>__subclasshook__</code>
       </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== STATIC METHODS ==================== -->
+<a name="section-StaticMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService-class.html#handle_request" class="summary-sig-name">handle_request</a>(<span class="summary-sig-arg">request</span>)</span><br />
+      Receives a new root word, from which it asks the WordExplorer to make
+      a JSON word tree.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.handle_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
     </td>
   </tr>
 </table>
@@ -204,84 +242,29 @@ object --+
   </td>
 </tr>
 </table>
-<a name="__init__"></a>
+<a name="handle_request"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">db</span>,
-        <span class="sig-arg">word</span>)</span>
-    <br /><em class="fname">(Constructor)</em>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">handle_request</span>(<span class="sig-arg">request</span>)</span>
+    <br /><em class="fname">Static Method</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__init__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.handle_request">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Provides a tuple generator, given a WordDatabase instance that 
-  accesses a word co-occurrence file, and a root word.</p>
+  <p>Receives a new root word, from which it asks the WordExplorer to make 
+  a JSON word tree. Stores that new tree in 
+  EchoTreeService.currentEchoTree. Then raises NewEchoTreeSignal so that 
+  all EchoTree handlers' on_new_echo_tree() method gets called.</p>
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>db</code></strong> (WordDatabase) - WordDatabase instance that wraps an SQLite co-occurrence file.</li>
-        <li><strong class="pname"><code>word</code></strong> (string) - Root word, whose follower words are to be found.</li>
-    </ul></dd>
-    <dt>Overrides:
-        object.__init__
-    </dt>
-  </dl>
-</td></tr></table>
-</div>
-<a name="__enter__"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__enter__</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__enter__">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Method required by contextmanager. Create a new cursor, then 
-  initializes a tuple stream &lt;followerWord&gt;&lt;count&gt;.</p>
-  <dl class="fields">
-    <dt>Returns: sqlite3.cursor</dt>
-        <dd>initialized database cursor.</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="__exit__"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__exit__</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">excType</span>,
-        <span class="sig-arg">excValue</span>,
-        <span class="sig-arg">traceback</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree-pysrc.html#WordFollower.__exit__">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Method required by contextmanager. Closes cursor. Called automatically
-  when 'with' clause goes out of scope, naturally, or via an exception.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>excType</code></strong> (string?) - Exception type if an exception occurred, or None.</li>
-        <li><strong class="pname"><code>excValue</code></strong> (Exception) - Exception object if an exception occurred, or None.</li>
-        <li><strong class="pname"><code>traceback</code></strong> (traceback.) - Traceback object if an exception occurred, or None.</li>
+        <li><strong class="pname"><code>request</code></strong> (HTTPRequest.HTTPRequest) - incoming new EchoTree</li>
     </ul></dd>
   </dl>
 </td></tr></table>

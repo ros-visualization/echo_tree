@@ -8,6 +8,7 @@ from python_qt_binding import QtBindingHelper;
 from QtGui import QApplication, QMainWindow, QWidget, QErrorMessage, QMessageBox;
 
 from root_word_pusher import RootWordPusher;
+from echo_tree_server import ECHO_TREE_NEW_ROOT_PORT;
 
 GUI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "QtCreatorFiles/echo_tree_push_tester/wordpushergui.ui");
 
@@ -60,7 +61,7 @@ class DialogService(QWidget):
 
 class WordPusherGui(QMainWindow):
     
-    def __init__(self, serverAddr, port=5002):
+    def __init__(self, serverAddr, port=ECHO_TREE_NEW_ROOT_PORT):
         super(WordPusherGui, self).__init__();
         
         self.serverAddr = serverAddr

@@ -55,85 +55,40 @@
 </b></center><br />
 <h1 class="epydoc">Class Hierarchy</h1>
 <ul class="nomargin-top">
-    <li> <strong class="uidlink">SocketServer.BaseRequestHandler</strong>:
-      <em class="summary">Base class for request handler classes.</em>
+    <li> <strong class="uidlink">object</strong>:
+      <em class="summary">The most base type</em>
     <ul>
-    <li> <strong class="uidlink">SocketServer.StreamRequestHandler</strong>:
-      <em class="summary">Define self.rfile and self.wfile for stream sockets.</em>
+    <li> <strong class="uidlink">tornado.web.RequestHandler</strong>:
+      <em class="summary">Subclass this class and define get() or post() to make a handler.</em>
     <ul>
-    <li> <strong class="uidlink">BaseHTTPServer.BaseHTTPRequestHandler</strong>:
-      <em class="summary">HTTP request handler base class.</em>
+    <li> <strong class="uidlink">echo_tree.tornado.websocket.WebSocketHandler</strong>:
+      <em class="summary">Subclass this class to create a basic WebSocket handler.</em>
     <ul>
-    <li> <strong class="uidlink">SimpleHTTPServer.SimpleHTTPRequestHandler</strong>:
-      <em class="summary">Simple HTTP request handler with GET and HEAD commands.</em>
+    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeService-class.html">echo_tree.echo_tree_server.EchoTreeService</a></strong>:
+      <em class="summary">Handles pushing new EchoTrees to browsers who display them.</em>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="echo_tree.root_word_pusher.RootWordPusher-class.html">echo_tree.root_word_pusher.RootWordPusher</a></strong>
+    </li>
+    <li> <strong class="uidlink">tornado.netutil.TCPServer</strong>:
+      <em class="summary">A non-blocking, single-threaded TCP server.</em>
+    <ul>
+    <li> <strong class="uidlink">echo_tree.tornado.httpserver.HTTPServer</strong>:
+      <em class="summary">A non-blocking, single-threaded HTTP server.</em>
     <ul>
     <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeScriptRequestHandler-class.html">echo_tree.echo_tree_server.EchoTreeScriptRequestHandler</a></strong>:
       <em class="summary">Web service serving a single JavaScript containing HTML page.</em>
     </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeServiceHandler-class.html">echo_tree.echo_tree_server.EchoTreeServiceHandler</a></strong>:
-      <em class="summary">Handles details of calls to the EchoTreeService.</em>
+    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService-class.html">echo_tree.echo_tree_server.NewEchoTreeSubmissionService</a></strong>:
+      <em class="summary">Service for submitting a new JSON encoded EchoTree.</em>
     </li>
     </ul>
     </li>
     </ul>
     </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeUpdateListener-class.html">echo_tree.echo_tree_server.EchoTreeUpdateListener</a></strong>:
-      <em class="summary">Instances of this class service a single incoming new-EchoTree 
-        submission, then die.</em>
-    </li>
-    </ul>
-    </li>
-    </ul>
-    </li>
-    <li> <strong class="uidlink">SocketServer.BaseServer</strong>:
-      <em class="summary">Base class for server classes.</em>
-    <ul>
-    <li> <strong class="uidlink">SocketServer.TCPServer</strong>:
-      <em class="summary">Base class for various socket-based server classes.</em>
-    <ul>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeClientScriptService-class.html">echo_tree.echo_tree_server.EchoTreeClientScriptService</a></strong>:
-      <em class="summary">Top level service for handing out a single script that knows how to
-        initiate a new-EchoTree even stream from the EchoTreeService to the
-        browser-based client that is pulling this script.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeNewTreeSubmissionService-class.html">echo_tree.echo_tree_server.EchoTreeNewTreeSubmissionService</a></strong>:
-      <em class="summary">Top level service for submitting a new JSON encoded EchoTree.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeService-class.html">echo_tree.echo_tree_server.EchoTreeService</a></strong>:
-      <em class="summary">Top level service for server-push updates to clients.</em>
-    </li>
-    </ul>
-    </li>
-    </ul>
-    </li>
-    <li> <strong class="uidlink">rfc822.Message</strong>:
-      <em class="summary">Represents a single RFC 2822-compliant message.</em>
-    <ul>
-    <li> <strong class="uidlink"><a href="mimetools.Message-class.html">mimetools.Message</a></strong>:
-      <em class="summary">A derived class of rfc822.Message that knows about MIME headers and
-        contains some hooks for decoding encoded and multipart messages.</em>
-    </li>
-    </ul>
-    </li>
-    <li> <strong class="uidlink">SocketServer.ThreadingMixIn</strong>:
-      <em class="summary">Mix-in class to handle each request in a new thread.</em>
-    <ul>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeClientScriptService-class.html">echo_tree.echo_tree_server.EchoTreeClientScriptService</a></strong>:
-      <em class="summary">Top level service for handing out a single script that knows how to
-        initiate a new-EchoTree even stream from the EchoTreeService to the
-        browser-based client that is pulling this script.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeNewTreeSubmissionService-class.html">echo_tree.echo_tree_server.EchoTreeNewTreeSubmissionService</a></strong>:
-      <em class="summary">Top level service for submitting a new JSON encoded EchoTree.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeService-class.html">echo_tree.echo_tree_server.EchoTreeService</a></strong>:
-      <em class="summary">Top level service for server-push updates to clients.</em>
-    </li>
-    </ul>
-    </li>
-    <li> <strong class="uidlink">object</strong>:
-      <em class="summary">The most base type</em>
-    <ul>
     <li> <strong class="uidlink"><a href="echo_tree.echo_tree.WordDatabase-class.html">echo_tree.echo_tree.WordDatabase</a></strong>:
       <em class="summary">Service class to wrap an underlying SQLite database file.</em>
     </li>
@@ -143,12 +98,84 @@
     <li> <strong class="uidlink"><a href="echo_tree.echo_tree.WordFollower-class.html">echo_tree.echo_tree.WordFollower</a></strong>:
       <em class="summary">Provides a 'with' facility for database cursors.</em>
     </li>
+    <li> <strong class="uidlink"><a href="echo_tree.tester_cli.WordPusherCLI-class.html">echo_tree.tester_cli.WordPusherCLI</a></strong>
+    </li>
     <li> <strong class="uidlink">threading._Verbose</strong>
     <ul>
     <li> <strong class="uidlink">threading.Thread</strong>
     <ul>
+    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread-class.html">echo_tree.echo_tree_server.EchoTreeService.NewEchoTreeWaitThread</a></strong>:
+      <em class="summary">Thread that waits for a new EchoTree to be submitted.</em>
+    </li>
     <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.SocketServerThreadStarter-class.html">echo_tree.echo_tree_server.SocketServerThreadStarter</a></strong>:
       <em class="summary">Used to fire up the three services each in its own thread.</em>
+    </li>
+    <li> <strong class="uidlink"><a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer-class.html">echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer</a></strong>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink">int</strong>:
+      <em class="summary">int(x[, base]) -&gt; integer</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="PyQt4.QtGui.QMainWindow.DockOption-class.html">PyQt4.QtGui.QMainWindow.DockOption</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="PyQt4.QtGui.QPaintDevice.PaintDeviceMetric-class.html">PyQt4.QtGui.QPaintDevice.PaintDeviceMetric</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="PyQt4.QtGui.QWidget.RenderFlag-class.html">PyQt4.QtGui.QWidget.RenderFlag</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink">sip.simplewrapper</strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="PyQt4.QtGui.QMainWindow.DockOptions-class.html">PyQt4.QtGui.QMainWindow.DockOptions</a></strong>:
+      <em class="summary">QMainWindow.DockOptions(QMainWindow.DockOptions) 
+        QMainWindow.DockOptions(int) QMainWindow.DockOptions()</em>
+    </li>
+    <li> <strong class="uidlink">PyQt4.QtGui.QPaintDevice</strong>:
+      <em class="summary">QPaintDevice()</em>
+    <ul>
+    <li> <strong class="uidlink">PyQt4.QtGui.QWidget</strong>:
+      <em class="summary">QWidget(QWidget parent=None, Qt.WindowFlags flags=0)</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="echo_tree.tester_gui.DialogService-class.html">echo_tree.tester_gui.DialogService</a></strong>
+    </li>
+    <li> <strong class="uidlink">PyQt4.QtGui.QMainWindow</strong>:
+      <em class="summary">QMainWindow(QWidget parent=None, Qt.WindowFlags flags=0)</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="echo_tree.tester_gui.WordPusherGui-class.html">echo_tree.tester_gui.WordPusherGui</a></strong>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="PyQt4.QtGui.QWidget.RenderFlags-class.html">PyQt4.QtGui.QWidget.RenderFlags</a></strong>:
+      <em class="summary">QWidget.RenderFlags(QWidget.RenderFlags) QWidget.RenderFlags(int) 
+        QWidget.RenderFlags()</em>
+    </li>
+    <li> <strong class="uidlink">sip.wrapper</strong>
+    <ul>
+    <li> <strong class="uidlink">PyQt4.QtCore.QObject</strong>:
+      <em class="summary">QObject(QObject parent=None)</em>
+    <ul>
+    <li> <strong class="uidlink">PyQt4.QtGui.QWidget</strong>:
+      <em class="summary">QWidget(QWidget parent=None, Qt.WindowFlags flags=0)</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="echo_tree.tester_gui.DialogService-class.html">echo_tree.tester_gui.DialogService</a></strong>
+    </li>
+    <li> <strong class="uidlink">PyQt4.QtGui.QMainWindow</strong>:
+      <em class="summary">QMainWindow(QWidget parent=None, Qt.WindowFlags flags=0)</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="echo_tree.tester_gui.WordPusherGui-class.html">echo_tree.tester_gui.WordPusherGui</a></strong>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
     </li>
     </ul>
     </li>
@@ -183,7 +210,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Aug 22 15:26:41 2012
+    Generated by Epydoc 3.0.1 on Sun Aug 26 09:17:47 2012
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
