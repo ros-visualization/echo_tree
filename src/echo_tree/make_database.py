@@ -36,7 +36,7 @@ class DBCreator(object):
         @return: array of token instances.
         @rtype: [Token]
         '''
-
+    
     @staticmethod
     def cleanEmailMessageFile(contentStr):
         # Delete all but the subject in the header:
@@ -66,6 +66,34 @@ class Token(object):
         self.word = word;
         self.sentenceID = sentenceID;
         
+# ---------------------------------------------- Class LineFeeder --------------------------
+
+class LineFeeder(object):
+    
+    def __init__(self, strWithNLs):
+        self.content = strWithNLs;
+        self.startIndex = 0;
+        
+    def __iter__(self):
+        return self;
+        
+    def next(self): #@ReservedAssignment
+        if self.startIndex < 0:
+            raise StopIteration();
+        
+        startIndex = self.startIndex;
+        try:
+            self.startIndex = self.content.index('\n', startIndex) + len('\n');
+            return self.content[startIndex:self.startIndex].strip();
+        except ValueError:
+            # No more newlines.
+            finalLineStartIndex = self.startIndex;
+            self.startIndex = -1; 
+            return self.content[finalLineStartIndex:].strip();
+        
+    def hasNext(self):
+        return self.startIndex >= 0;
+    
 # ---------------------------------------------- Class WordIndex --------------------------
 
 class WordIndex(object):
@@ -305,6 +333,7 @@ if __name__ == '__main__':
                             'Greg Thorse\nMy test message.\n', 
                             "Failed extraction of subject line and stripping of header. Got: '%s'" % msg);
                 
+        @unittest.skipIf(not testAll, 'Skipping word tree construction')
         def testBuildWordTree(self):
             root1 = 'foo';
             root2 = 'bar';
@@ -324,6 +353,22 @@ if __name__ == '__main__':
             
             #print str(WordIndex.allPostings);
             WordIndex.prettyPrint();
-         
+
+        def testLineFeeder(self):
+            content = "This is\nmy poem.";
+            feeder = LineFeeder(content);
+            lineCounter = 0;
+            for line in feeder:
+                if lineCounter == 0:
+                    self.assertEqual(line,
+                                     'This is', 
+                                     "Failed first line. Got: '%s'" % str(line));
+                else:
+                    lineCounter += 1;
+                    self.assertEqual(line,
+                                     'my poem.', 
+                                     "Failed second line. Got: '%s'" % str(line));
+            
+            
     unittest.main();
     
