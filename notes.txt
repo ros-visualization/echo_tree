@@ -1,3 +1,10 @@
+- Enron data:
+    o 531,422 messages
+    o 2.624GB of total length
+
+   
+
+
 Result of stringifying in JSON. This is what Python server
 must generate and send over the WebSocket wire:
 {

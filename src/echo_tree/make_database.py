@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 
 import os;
+import sys;
 import string;
 from collections import OrderedDict;
+
+from optparse import OptionParser;
 
 # TODO: write tokenize()
 #       write dumpToDB()
 #       write dumpToCSV()
 
+EMAIL_SEPARATOR_PREFIX  = '#/*'
+EMAIL_SEPARATOR_POSTFIX = '*/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#^@\n'
+
+EMAIL_FILE_CHUNK_SIZE   = 50000000 # 50MB
+
 # ---------------------------------------------- Class DBCreator --------------------------
 
 class DBCreator(object):
+
+    DELETE_EMBEDDED_HEADERS = True
     
     def __init__(self, mailDirRoot, targetDBPath):
         self.mailDirRoot = mailDirRoot
@@ -26,6 +36,62 @@ class DBCreator(object):
             for token in tokenArray:
                 WordIndex.addPosting(WordPosting(token.word, token.sentenceID));
 
+    def createCleanEmailCollection(self, outputDirPath, filePrefix='email', maxContent=None):
+        '''
+        Pulls all email messages through the EmailMessageFeeder, clearing 
+        out the headers. Creates a series of EMAIL_FILE_CHUNCK_SIZE files
+        with the resulting cleaned email messages. Within files messages are
+        separated with a standard string that contains a serial number
+        of the following email message. The string is constructed by
+        concatenating EMAL_SEPARATOR_PREFIX<serialNumber>EMAIL_SEPARATOR_POSTFIX.
+        Example:
+        
+        #*/123*/-------------------------#^@\n
+        
+        @param outputDirPath: path to where output files will be stored
+        @type outputDirPath: string
+        @param filePrefix: string prepended to each email file chunk, which is followed by a serial number. 
+        @type filePrefix: string
+        @param maxContent: limit to number of bytes worth of email messages to process.
+        @type maxContent: int
+        @raises: ValueError if output directory does not exist
+        '''
+        
+        # Test whether the output dir exists before doing any work:
+        if not os.path.isdir(outputDirPath):
+            raise IOError("Path '%s' is not an existing directory." % outputDirPath);
+        
+        feeder = EmailMessageFeeder(self.mailDirRoot, fileContentCleaner=DBCreator.cleanEmailMessageFile);
+        emailIndex = -1;
+        currFileIndex = -1;
+        currFileFD = None;
+        # Force new file as first action in loop below:
+        contentLenThisFile = EMAIL_FILE_CHUNK_SIZE + 1;
+        # Keep track of overall bytes processed (across all output files):
+        contentLenTotal = 0;
+        for email in feeder:
+            if contentLenThisFile >= EMAIL_FILE_CHUNK_SIZE:
+                if currFileFD is not None:
+                    currFileFD.close();
+                currFileIndex += 1;
+                currFilePath = os.path.join(outputDirPath, filePrefix + str(currFileIndex) + '.txt');
+                try:
+                    currFileFD = open(currFilePath, 'w');
+                except IOError as e:
+                    raise IOError("Cannot open new email file '%s' for writing: %s" % (currFilePath, `e`));
+                contentLenThisFile = 0;     
+                
+            # Email separator:
+            emailIndex += 1;
+            sep = EMAIL_SEPARATOR_PREFIX + str(emailIndex) + EMAIL_SEPARATOR_POSTFIX;
+            currFileFD.write(sep);
+            currFileFD.write(email);
+            currFileFD.write('\n');
+            contentLenThisFile += len(email);
+            contentLenTotal += len(email);
+            if maxContent is not None and contentLenTotal >= maxContent:
+                return;
+             
     def tokenize(self, msg):
         '''
         Given an email message as a string, partition the msg into sentences,
@@ -39,23 +105,37 @@ class DBCreator(object):
     
     @staticmethod
     def cleanEmailMessageFile(contentStr):
+        '''
+        Given one email message, remove its header, except for the content
+        of the Subject line. If DBCreator.DELETE_EMBEDDED_HEADERS is True,
+        goes through entire message and deletes lines starting with any of
+        the common email headers.
+        @param contentStr: content of email, including header
+        @type contentStr: string
+        @return: cleaned up email
+        @rtype: string
+        '''
         # Delete all but the subject in the header:
         subjLineIndx = string.find(contentStr, 'Subject:');
         if  subjLineIndx > -1:
             # Found start of 'Subject: ' field in header:
             # Pt to start of subject proper:
             subjLineIndx += 8; # len('Subject:')
-            subjLineEndIndx = string.find(contentStr[subjLineIndx:], '\n');
+            subjLineEndIndx = string.find(contentStr[subjLineIndx:], '\r\n');
             if subjLineEndIndx > -1:
                 subjLine = contentStr[subjLineIndx:subjLineIndx + subjLineEndIndx].strip();
             else:
                 subjLine = '';
         # Find end of header:
-        headerEndIndx = string.find(contentStr, '\n\n');
+        headerEndIndx = string.find(contentStr, '\r\n\r\n');
         if headerEndIndx > -1:
-            res = subjLine + '\n' + contentStr[headerEndIndx + 2:]; # Drop to double \n
+            # Drop content to just after double \r\n:
+            res = subjLine + '\n' + contentStr[headerEndIndx + 4:]; 
         else:
             res = contentStr;
+            
+        if DELETE_EMBEDDED_HEADERS:
+            pass
         return res;
         
 # ---------------------------------------------- Class Token  --------------------------
@@ -299,7 +379,27 @@ class EmailMessageFeeder(object):
 
 if __name__ == '__main__':
     
+    parser = OptionParser();
+    #parser.add_option("-d", "--dirIn", dest="emailsDirName");
+    #parser.add_option("-o", "--fileOut", dest="dbOutFile");
+    parser.add_option("-t", "--test", dest="testing");
+    
+    (options, args) = parser.parse_args()
+    if (len(args) != 2) and testing is None:
+        print "Usage: make_database { -t/--test | <emailDirPath> <mySqlOutFilePath>}";
+        sys.exit();
+        
+    #print "Args: '%s'" % args
+    #print "Options: '%s'" % options
+    #sys.exit()
+    
+    emailsDir = args[0];
+    dbOutFile = args[1];
+    dbCreator = dbCreator(emailsDir, dbOutFile);
+    
+    
     import unittest
+    import shutil
     
     testAll = False;
     
@@ -354,6 +454,7 @@ if __name__ == '__main__':
             #print str(WordIndex.allPostings);
             WordIndex.prettyPrint();
 
+        @unittest.skipIf(not testAll, 'Skipping word tree construction')
         def testLineFeeder(self):
             content = "This is\nmy poem.";
             feeder = LineFeeder(content);
@@ -368,7 +469,22 @@ if __name__ == '__main__':
                     self.assertEqual(line,
                                      'my poem.', 
                                      "Failed second line. Got: '%s'" % str(line));
+        def testCreateCleanEmailCollection(self):
+            outputDir = os.path.join(os.path.dirname(os.path.realpath(__file__)),'Resources/EmailCollectingTest');
+            if os.path.isdir(outputDir):
+                # For fresh test, remove the test target dir:
+                shutil.rmtree(outputDir);
+            try:
+                self.dbCreator.createCleanEmailCollection(outputDir, 'emailTest');
+                # Should have failed, because output directory doesn't exist:
+                raise AssertionError("Should have seen IOError about output dir not existing.");
+            except IOError:
+                # Got expected exception:
+                pass;
             
+            os.mkdir(outputDir);
+            self.dbCreator.createCleanEmailCollection(outputDir, 'emailTest');
+                
             
     unittest.main();
     
