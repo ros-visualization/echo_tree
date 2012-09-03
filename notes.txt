@@ -2,7 +2,9 @@
     o 531,422 messages
     o 2.624GB of total length
 
-   
+- Full run:
+    Processed 517424 emails (1421.000 MB)
+    Mon Sep  3 12:27:35 PDT 2012
 
 
 Result of stringifying in JSON. This is what Python server
