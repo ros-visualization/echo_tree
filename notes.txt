@@ -1,3 +1,16 @@
+- The Enron email database is processed from the initial untarred
+  directory tree with email files at the leafs by using scripts in
+  src/bash_scripts:
+     o Create two sets of files: one just the raw emails chunked into
+       50MB files, with separators in between, and a sister set with
+       those messages cleaned up (numbers, special chars, URLs, email 
+       headers removed). The raw set are called email<n>.txt, the latter
+       email<n>_NoHeads.txt. They will appear in 
+       src/echo_tree/Resources/EnronCollectionProcessed/.
+
+       For protextion I copy the latest of these two set into 
+
+
 - Enron data:
     o 531,422 messages
     o 2.624GB of total length
@@ -5,6 +18,10 @@
 - Full run:
     Processed 517424 emails (1421.000 MB)
     Mon Sep  3 12:27:35 PDT 2012
+
+- Using the Stanford NLP sentence segmenter and tokenizer:
+     java edu.stanford.nlp.process.DocumentPreprocessor -file myDoc.txt > oneTokenizedSentencePerLine.txt
+        -file for Text file, -html for HTML, etc.
 
 
 Result of stringifying in JSON. This is what Python server

@@ -8,3 +8,4 @@ src/echo_tree/QtCreatorFiles/echo_tree_push_tester/echo_tree_push_tester.pro.use
 doc/html/*\.tornado*
 doc/html/*\.python_qt_binding*
 src/echo_tree/Resources/EmailCollectingTest/
+src/echo_tree/Resources/EnronCollectionProcessed/

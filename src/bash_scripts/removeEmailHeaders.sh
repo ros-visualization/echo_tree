@@ -37,6 +37,7 @@ do
 	#echo Match
 	continue
     fi
+    echo "Cleaning $file..."
     dirname=${file%/*}
     #echo "Dirname: $dirname"
     fileName=${file##*/}
@@ -46,8 +47,14 @@ do
     extension=${fileName#*.}
     #echo "Extension: $extension"
 
+    # Only process .txt files:
+    if [ $extension != "txt" ]
+    then
+       continue
+    fi
+
     outputName=${dirname}/${fileNameNoExt}_NoHeads.${extension}
-    #echo $outputName
+    $echo $outputName
 
     # Get rid of email headers.
     # The -r turns on extended regex, which adds the
@@ -94,6 +101,19 @@ do
       # email addresses, commas, and whitespace are
       # present. Not sure how to fix:
       s/[\da-zA-Z._]+@[\da-zA-Z._]+[\s,]*//g
+
+      # URLs:
+      s/http:\/\/[$&+,/.,=?@a-zA-Z0-9]+[\s].*//g
+
+      # Special chars:
+      s/[\\*/#@_\-><(){}$]+//g
+
+      # Sequences of more than one punctuation mark:
+      # replace with just one:
+      s/([.!?:,;])[.!?:,;]+/\1/g
+
+      # Numbers:
+      s/[[:digit:]]*//g
 
       ' <$file >$outputName
 

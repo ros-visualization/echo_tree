@@ -214,9 +214,10 @@ class DBCreator(object):
 
 class Token(object):
     
-    def __init__(self, word, sentenceID):
+    def __init__(self, word, sentenceID, emailID):
         self.word = word;
         self.sentenceID = sentenceID;
+        self.emailID = emailID;
         
 # ---------------------------------------------- Class LineFeeder --------------------------
 
@@ -353,17 +354,18 @@ class WordPosting(object):
     May be used as an iterator: for followPosting in oneWordPosting:...
     '''
     
-    def __init__(self, word, sentenceID):
+    def __init__(self, word, sentenceID, emailMsgID):
         self.rootWord = word;
         self.wordPostingsDict = OrderedDict();
         self.inSentence = set([sentenceID]);
+        self.inEmail = set([emailMsgID]);
         self.followingCount = 1;
         self.wordPostingsIndex = -1;
 
     def getRootWord(self):
         return self.rootWord;
     
-    def addFollowsWord(self, newFollowWordPosting, currentSentenceID):
+    def addFollowsWord(self, newFollowWordPosting, currentSentenceID, currentEmailID):
         '''
         Given a posting that follows this word, and a sentence ID for context,
         add the new posting into the wordPostingsDict. Also add the sentence ID
@@ -372,6 +374,8 @@ class WordPosting(object):
         @type newFollowWordPosting: WordPosting
         @param currentSentenceID: ID of sentence in which the new word followed.
         @type currentSentenceID: int
+        @param currentEmailID: ID of email message in which new word occurred.
+        @type: currentEmailID: int
         '''
         try:
             # Does this follow-word already exist in this posting's follow-words?
@@ -379,7 +383,8 @@ class WordPosting(object):
             myFollowPosting.followingCount += 1;
         except KeyError:
             self.wordPostingsDict[newFollowWordPosting.getRootWord()] = newFollowWordPosting;
-        self.inSentence.add(currentSentenceID);    
+        self.inSentence.add(currentSentenceID);
+        self.inEmail.add(currentEmailID);
         
     def __iter__(self):
         self.rootWords = WordIndex.allPostings.keys();
