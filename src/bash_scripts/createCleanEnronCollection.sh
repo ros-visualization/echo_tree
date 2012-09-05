@@ -13,7 +13,25 @@ then
     mkdir $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed
 fi
 
-mkdir foo
+../echo_tree/make_clean_email_files.py $HOME/Project/Dreslconsulting/Data/Enron/enron_mail_20110402/maildir/ \
+          $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/enronData.db -c
 
-../echo_tree/make_database.py $HOME/Project/Dreslconsulting/Data/Enron/enron_mail_20110402/maildir/ \
-                              $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/enronData.db -c
+if [ ! -d $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronRaw ]
+then
+    mkdir $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronRaw
+fi
+
+if [ ! -d $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronCleaned ]
+then
+    mkdir $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronCleaned
+fi
+
+echo "Moving cleaned files into subdirectory EnronCleaned..."
+mv $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/*_*.txt \
+   $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronCleaned
+echo "Moving raw email files to EnronRaw..."
+mv $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/email*.txt \
+   $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronRaw
+
+echo "Done."
+echo "Next step: run tokenizeCleanEmails.sh

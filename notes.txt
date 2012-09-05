@@ -1,14 +1,30 @@
 - The Enron email database is processed from the initial untarred
   directory tree with email files at the leafs by using scripts in
   src/bash_scripts:
-     o Create two sets of files: one just the raw emails chunked into
+
+     Step 1: using createCleanEnronCollection.sh, create two sets of
+       ffiles: one just the raw emails chunked into  
        50MB files, with separators in between, and a sister set with
        those messages cleaned up (numbers, special chars, URLs, email 
        headers removed). The raw set are called email<n>.txt, the latter
        email<n>_NoHeads.txt. They will appear in 
-       src/echo_tree/Resources/EnronCollectionProcessed/.
+       src/echo_tree/Resources/EnronCollectionProcessed/EnronRaw, and
+       src/echo_tree/Resources/EnronCollectionProcessed/EnronCleaned, and
+       Assumption: collection is in $HOME/Project/Dreslconsulting/Data/Enron/enron_mail_20110402/maildir/
 
-       For protextion I copy the latest of these two set into 
+           ./createCleanEnronCollection.sh 
+
+     Step2: using tokenizeCleanEmails.sh, create arrays of tokens, one
+       array for each sentence. Result will be in 
+       src/echo_tree/Resources/EnronCollectionProcessed/EnronTokenized.
+
+           ./tokenizeCleanEmails.sh
+
+- The tokenization/sentence segmentation is done using Stanford NLP
+  core. Separate package: echo_tree_sentence_seg. Use Eclipse over
+  that Maven project to create target/emailTokenizer.jar. Copy that
+  jar file into ... echo_tree/src/bash_scripts. (Already done in a
+  cloned project.
 
 
 - Enron data:

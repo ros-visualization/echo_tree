@@ -54,7 +54,7 @@ do
     fi
 
     outputName=${dirname}/${fileNameNoExt}_NoHeads.${extension}
-    $echo $outputName
+    echo $outputName
 
     # Get rid of email headers.
     # The -r turns on extended regex, which adds the
@@ -62,6 +62,10 @@ do
     # on each email line, and deletes that line if it
     # matches the pattern:
     sed -r '
+
+      /#\/\*([0-9]+)\*\/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#\^@/n
+
+
       # Email headers (some only at start of line ('^'), 
       # some anywhere in a line:
       /Content-Transfer-Encoding: .*/ d
