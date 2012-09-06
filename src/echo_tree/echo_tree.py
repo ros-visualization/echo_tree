@@ -16,6 +16,7 @@ database of co-occurrence data in a collection. Provides both
 Python and JSON results.
 '''
 
+# ------------------------------- class Word Database ---------------------
 class WordDatabase(object):
     '''
     Service class to wrap an underlying SQLite database file.
@@ -33,6 +34,7 @@ class WordDatabase(object):
     def close(self):
         pass;
 
+# ------------------------------- class Word Follower ---------------------
 class WordFollower(object):
     '''
     Provides a 'with' facility for database cursors. Used by
@@ -82,7 +84,7 @@ class WordFollower(object):
             pass;
         self.cursor.close();
         
-        
+# ------------------------------- class Word Explorer ---------------------        
 class WordExplorer(object):
     '''
     Main class. Provides extraction of a frequency ordered JSON
