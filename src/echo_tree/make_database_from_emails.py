@@ -13,37 +13,95 @@ STOPWORDS = ['the', 'of', 'and', 'to', 'in', 'I', 'that', 'was', 'his', 'he', 'i
 
 class DBCreator(object):
 
-    def __init__(self, dirToTokens, outFileName, maxNumSentences=None):
+    def __init__(self, dirToTokens, outFileName, maxNumSentences=None, logFile=None):
         
         
         if not os.path.isdir(dirToTokens):
-            raise ValueError("Directory to token chunk files must exist, and must contain files.");
+            raise IOError("Directory to token chunk files must exist, and must contain files.");
         if maxNumSentences is not None and maxNumSentences <= 0:
             raise ValueError("Maximum number of sentences to process must be a postive integers.");
+    
+    
+        self.logFile = logFile;
+        if self.logFile is not None:
+            try:
+                self.logFD = open(self.logFile, 'w');
+            except IOError:
+                raise IOError("Cannot open logfile %s for writing." % logFile);
+        else:
+            self.logFD = sys.stdout;
+    
+        # Ensure that we will be able to open the output file
+        # before we do a bunch of work: 
+        try:
+            fd = open(outFileName,'w');
+            fd.close();
+        except IOError:
+            raise IOError("Cannot open output file %s for writing." % outFileName);
         
-        self.wordIndex = WordIndex();
+        # (WordIndex is a static method, so no instantiation)
         tokenFeeder = TokenFeeder(dirToTokens, maxNumSentences=maxNumSentences);
         currToken = tokenFeeder.next();
+        # For progress reporting:
+        msgsProcessed = 0;
+        msgsProcessedSinceReporting = 0;
+        #LOG_MSG_INTERVAL = 1000
+        LOG_MSG_INTERVAL = 2
+        nxtMsgReportAfter = LOG_MSG_INTERVAL;
+        currMsgID = 0;
         try:
             for token in tokenFeeder:
                 nextToken = tokenFeeder.next();
-                currPosting = self.wordIndex.getPosting(currToken.word);
+                currPosting = WordIndex.getPosting(currToken.word);
                 if currPosting is None:
                     currPosting = WordPosting(currToken.word, currToken.sentenceID, currToken.emailID);
-                    self.wordIndex.addPosting(currPosting);
-                nextPosting = self.wordIndex.getPosting(nextToken.word);
+                    WordIndex.addPosting(currPosting);
+                nextPosting = WordIndex.getPosting(nextToken.word);
                 if nextPosting is None:
                     nextPosting = WordPosting(nextToken.word, nextToken.sentenceID, nextToken.emailID);
-                    self.wordIndex.addPosting(nextPosting);
+                    WordIndex.addPosting(nextPosting);
                 if nextToken.sentenceID == currToken.sentenceID:
                     currPosting.addFollowsWord(nextPosting, nextToken.sentenceID, nextToken.emailID);
                 currToken = nextToken;
+                if currToken.emailID != currMsgID:
+                    msgsProcessedSinceReporting += 1;
+                    if msgsProcessedSinceReporting >= nxtMsgReportAfter:
+                        msgsProcessed += msgsProcessedSinceReporting;
+                        nxtMsgReportAfter = msgsProcessed + LOG_MSG_INTERVAL;
+                        msgsProcessedSinceReporting = 0;
+                        self.log("Processed %d emails..." % msgsProcessed);
         except StopIteration:
             pass
             
+        self.log("Done creating in-memory index. Writing to csv file...");
+
         # Build the CSV file:
-        
-        print("Done.");
+        with open(outFileName, 'w') as csvFD:
+            # The column headers:
+            csvFD.write("Word,Follower,FollowersCount,MetaWordCount,MetaNumSuccessors,MetaNumSentenceOcc,MetaNumMsgOcc\n");
+            for wordPosting in WordIndex.__iter__():
+                word = wordPosting.getRootWord();
+                # Write the summary information about this word:
+                csvFD.write(word + ',' +\
+                            # No Follower
+                            ',' +\
+                            # No FollowersCount
+                            ',' +\
+                            # MetaWordCount:
+                            str(wordPosting.getNumWordOccences()) + ',' +\
+                            # MetaNumSuccessors:
+                            str(wordPosting.getNumFollowers()) + ',' +\
+                            # Num of sentences in which word occurrs:
+                            str(wordPosting.getNumOfSentenceOccurrences()) + ',' +\
+                            # Num of email msgs in which word occurs:
+                            str(wordPosting.getNumOfEmailOccurrences)) +\
+                            '\n';
+                                                          
+        self.log("Done.");
+        self.logFD.close();
+    
+    def log(self, msg):
+        print >>self.logFD, msg; 
         
 # ---------------------------------------------- Class TokenFeeder  --------------------------
 
@@ -407,18 +465,23 @@ class WordIndex(object):
     '''
     Entire word index. Holds a data structure like this:
     
-    foo(2,set([0]))
-    bar(5,set([1, 2, 3]))
-    ----one(1,set([2]))
-    ----two(2,set([3]))
+    foo(2,set([0]),set([0]))
+    bar(5,set([1, 2, 3]), set([3]))
+    ----one(1,set([2]),set([2,5,10]))
+    ----two(2,set([3]), set([3,14]))
     
-    foo occurred twice, both times in sentence 0.
-    bar occurred five times, in sentences 1,2,and 3
-    bar was following by the word 'one' one time, in sentence 3
-    bar was following by the word 'two' twice, in sentence 3
+    foo occurred twice, both times in sentence 0 of msg 0.
+    bar occurred five times, in sentences 1,2,and 3 of msg 3
+    bar was following by the word 'one' one time, in sentence 3, msgs 2,5, and 10
+    bar was following by the word 'two' twice, in sentence 3, msgs 3 and 14
     '''
     
     allPostings = OrderedDict();
+
+
+    @staticmethod
+    def __iter__():
+        return WordIndex.WordIterator();
     
     @staticmethod
     def addPosting(wordPosting):
@@ -493,6 +556,28 @@ class WordIndex(object):
         for followKey in posting.wordPostingsDict.keys():
             printout += '\n' + WordIndex.prettyPrintHelper(indentSpaces + len(word), followKey, posting.wordPostingsDict[followKey]);
         return printout;
+    
+    class WordIterator(object):
+        '''
+        Provides an iterator service for the enclosing class WordIndex.
+        Feeds out one WordPosting at a time, one for each word in the index.
+        '''
+        
+        def __init__(self):
+            # Use iteration through WordIndex's root words, i.e. the dict keys:
+            self.theIterator = WordIndex.allPostings.__iter__();
+            
+        def __iter__(self):
+            return self.theIterator;
+        
+        def next(self):
+            '''
+            Get next key from the WordIndex.allPostings dict (a word), and 
+            return its item: a WordPosting.
+            '''
+            # Get next word's posting, and return it:
+            return WordIndex[self.theIterator.next()];
+        
 
 # ---------------------------------------------- Class WordPosting --------------------------
 
@@ -521,6 +606,34 @@ class WordPosting(object):
 
     def __str__(self):
         return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
+
+    def getNumOccurrences(self):
+        '''
+        @return: total number of this word's occurrences.
+        @rtype: int
+        '''
+        return self.followingCount;
+    
+    def getNumFollowers(self):
+        '''
+        @return: number of words that follow this word
+        @rtype: int
+        '''
+        return len(self.wordPostingsDict.keys());
+    
+    def getNumOfEmailOccurrences(self):
+        '''
+        @return: number of emails  in which this word occurred.
+        @rtype: int
+        '''
+        return len(self.inEmail);
+    
+    def getNumOfSentenceOccurrences(self):
+        '''
+        @return: number of sentences  in which this word occurred.
+        @rtype: int
+        '''
+        return len(self.inSentence);
 
     def getRootWord(self):
         return self.rootWord;
@@ -551,6 +664,12 @@ class WordPosting(object):
         return self;
     
     def next(self): #@ReservedAssignment
+        '''
+        Iterator over the successor postings of this posting.
+        @return: each call returns one posting that represents a follow-on word,
+                 until no more followers are left.
+        @rtype: WordPosting
+        '''
         self.wordPostingsIndex += 1;
         if self.wordPostingsIndex >= len(self.rootWords):
             raise StopIteration;
@@ -571,7 +690,7 @@ if __name__ == '__main__':
 
     if not args.testing:
         tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
-        dbCreator = DBCreator(tokenChunkFilesDir, maxNumSentences=3);
+        dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', maxNumSentences=10, logFile='/tmp/myLog.txt');
         # Word, FollowerWord, Count, EmailIDs, SentenceIDs
         sys.exit();
     else:
