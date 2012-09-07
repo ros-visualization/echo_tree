@@ -88,14 +88,14 @@ class DBCreator(object):
                             # No FollowersCount
                             ',' +\
                             # MetaWordCount:
-                            str(wordPosting.getNumWordOccences()) + ',' +\
+                            str(wordPosting.getNumOccurrences()) + ',' +\
                             # MetaNumSuccessors:
                             str(wordPosting.getNumFollowers()) + ',' +\
                             # Num of sentences in which word occurrs:
                             str(wordPosting.getNumOfSentenceOccurrences()) + ',' +\
                             # Num of email msgs in which word occurs:
-                            str(wordPosting.getNumOfEmailOccurrences)) +\
-                            '\n';
+                            str(wordPosting.getNumOfEmailOccurrences()) +\
+                            '\n');
                                                           
         self.log("Done.");
         self.logFD.close();
@@ -568,15 +568,18 @@ class WordIndex(object):
             self.theIterator = WordIndex.allPostings.__iter__();
             
         def __iter__(self):
-            return self.theIterator;
+            return self;
         
         def next(self):
             '''
             Get next key from the WordIndex.allPostings dict (a word), and 
             return its item: a WordPosting.
             '''
-            # Get next word's posting, and return it:
-            return WordIndex[self.theIterator.next()];
+            # Get next word's posting, and return it.
+            # The WordIndex.allPostings iterator with throw
+            # the required StopIteration exception when
+            # the word index is exhausted:
+            return WordIndex.getPosting(self.theIterator.next());
         
 
 # ---------------------------------------------- Class WordPosting --------------------------
