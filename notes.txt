@@ -35,6 +35,42 @@
     Processed 517424 emails (1421.000 MB)
     Mon Sep  3 12:27:35 PDT 2012
 
+- Stopwords 
+  Selected from the 100 pre billion most frequent English words
+  at http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/PG/2006/04/1-10000
+the
+of
+and
+to
+in
+I
+that
+was
+his
+he
+it
+is
+for
+as
+had
+on
+at
+by
+this
+are
+an
+has
+its
+a
+these
+mr
+
+
+
+
+----------------------------------
+
+
 - Using the Stanford NLP sentence segmenter and tokenizer:
      java edu.stanford.nlp.process.DocumentPreprocessor -file myDoc.txt > oneTokenizedSentencePerLine.txt
         -file for Text file, -html for HTML, etc.

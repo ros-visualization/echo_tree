@@ -8,12 +8,86 @@ from collections import OrderedDict
 
 
 # TODO:
-#   - [<sep>] gives a trailing sentence fragment of ']]' Fix.
+
+STOPWORDS = ['the', 'of', 'and', 'to', 'in', 'I', 'that', 'was', 'his', 'he', 'it', 'is', 'for', 'as', 'had', 'on', 'at', 'by', 'this', 'are', 'an', 'has', 'its', 'a', 'these', 'mr'];
 
 class DBCreator(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, dirToTokens, outFileName, maxNumSentences=None):
+        
+        
+        if not os.path.isdir(dirToTokens):
+            raise ValueError("Directory to token chunk files must exist, and must contain files.");
+        if maxNumSentences is not None and maxNumSentences <= 0:
+            raise ValueError("Maximum number of sentences to process must be a postive integers.");
+        
+        self.wordIndex = WordIndex();
+        tokenFeeder = TokenFeeder(dirToTokens, maxNumSentences=maxNumSentences);
+        currToken = tokenFeeder.next();
+        try:
+            for token in tokenFeeder:
+                nextToken = tokenFeeder.next();
+                currPosting = self.wordIndex.getPosting(currToken.word);
+                if currPosting is None:
+                    currPosting = WordPosting(currToken.word, currToken.sentenceID, currToken.emailID);
+                    self.wordIndex.addPosting(currPosting);
+                nextPosting = self.wordIndex.getPosting(nextToken.word);
+                if nextPosting is None:
+                    nextPosting = WordPosting(nextToken.word, nextToken.sentenceID, nextToken.emailID);
+                    self.wordIndex.addPosting(nextPosting);
+                if nextToken.sentenceID == currToken.sentenceID:
+                    currPosting.addFollowsWord(nextPosting, nextToken.sentenceID, nextToken.emailID);
+                currToken = nextToken;
+        except StopIteration:
+            pass
+            
+        # Build the CSV file:
+        
+        print("Done.");
+        
+# ---------------------------------------------- Class TokenFeeder  --------------------------
+
+class TokenFeeder(object):
+    '''
+    Main class. Given a directory with tokenized emails, generate
+    a CSV file. Schema: Word,EmailID,SentenceID
+    '''
+    
+    def __init__(self, dirToTokens, maxNumSentences=None):
+    
+        if maxNumSentences is not None and maxNumSentences <= 0:
+            raise ValueError("Maximum number of sentences to process must be a postive integers.");
+        self.maxNumSentences = maxNumSentences    
+        self.sentenceIt = SentenceFeeder(dirToTokens);
+        self.currSentence = None;
+        self.tokenIt = None;
+        self.numSentencesProcessed = 0;
+        TokenFromSentenceFeeder.currSentenceID = 0;
+            
+    def __iter__(self):
+        return self;
+    
+    def next(self):
+        while 1:
+            if self.currSentence is None:
+                # Will throw StopIteration when no more sentences:
+                self.currSentence = self.sentenceIt.next();
+                self.numSentencesProcessed += 1;
+                TokenFromSentenceFeeder.currSentenceID += 1;
+                if self.maxNumSentences is not None and self.numSentencesProcessed > self.maxNumSentences:
+                    raise StopIteration;
+                self.tokenIt = TokenFromSentenceFeeder(self.currSentence);
+            while 1:
+                try:
+                    newTokenObj = self.tokenIt.next();
+                except StopIteration:
+                    # All tokens in this sentence have been fed out.
+                    # Continue in the outer loop, getting a new sentence:
+                    self.currSentence = None;
+                    break;
+                if newTokenObj is None:
+                    continue;
+                return newTokenObj;
 
 # ---------------------------------------------- Class Token  --------------------------
 
@@ -32,7 +106,7 @@ class Token():
         
 # ---------------------------------------------- Class TokenFeeder --------------------------        
 
-class TokenFeeder(object):
+class TokenFromSentenceFeeder(object):
     '''
     Given one tokenized sentence, provide an iterator over the tokens.
     A tokenized sentence is a string of the form:
@@ -55,7 +129,7 @@ class TokenFeeder(object):
 	# Regular expressions for use in weeding out bad tokeans:
     allPunctuationTest = re.compile('[^,!;.?]') #  If None: only punctuation
     allCapsTest = re.compile('[a-z]')        # If None: only Upper case
-    contractionTest = re.compile("[\s]*('[a-z]*)") # If non-None, then matchObj.group(1) is the contraction
+    contractionTest = re.compile("('[^,]*)"); # If non-None, then matchObj.group(1) is the contraction
 	# Regexp pattern that matches <anything>#, \/, \*, 383869, \*, \/, !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, #, ^, @<anything>
 	# The three groups (parenthsized portions) capture, respectively everything before the opening '#',
 	# the number (email ID of following msg), and everything after the closing '@':
@@ -89,15 +163,15 @@ class TokenFeeder(object):
             (sentenceTrail, nextEmailID, sentenceFrontEnd) = self.isNewMsgSep(self.sentence);
             if sentenceTrail is None:
                 # Just an ordinary sentence:
-                self.tokenIt = TokenFeeder.tokenExtractPattern.finditer(self.sentence);
+                self.tokenIt = TokenFromSentenceFeeder.tokenExtractPattern.finditer(self.sentence);
             else:                
                 # This sentence straddles two messages.
                 # Remember the start of the next email message on the 
                 # far side of the email message separator:
                 self.fragNextMessage = sentenceFrontEnd;
                 # The ID of the upcoming message: 
-                self.nextMsgID = nextEmailID;
-                self.tokenIt = TokenFeeder.tokenExtractPattern.finditer(sentenceTrail);
+                self.nextMsgID = int(nextEmailID);
+                self.tokenIt = TokenFromSentenceFeeder.tokenExtractPattern.finditer(sentenceTrail);
                 
         try:
             matchObj = self.tokenIt.next();
@@ -105,10 +179,10 @@ class TokenFeeder(object):
             # Sentence is exhausted. But do we already have the beginning
             # sentence of the next message in this sentence?:
             if self.fragNextMessage is not None:
-                TokenFeeder.currMsgID = self.nextMsgID;
-                self.tokenIt = TokenFeeder.tokenExtractPattern.finditer(self.fragNextMessage);
+                TokenFromSentenceFeeder.currMsgID = self.nextMsgID;
+                self.tokenIt = TokenFromSentenceFeeder.tokenExtractPattern.finditer(self.fragNextMessage);
                 self.fragNextMessage = None;
-                TokenFeeder.currMsgID = self.nextMsgID;
+                TokenFromSentenceFeeder.currMsgID = self.nextMsgID;
                 self.nextMsgID = None;
                 try:
                     matchObj = self.tokenIt.next();
@@ -124,29 +198,61 @@ class TokenFeeder(object):
         # for all other tokens (could build a better pattern, I'm sure):
         if matchObj.group(1) is None:
             word = matchObj.group(2)
+            endOfToken = matchObj.end(2);
         else:
             word = matchObj.group(1)
+            endOfToken = matchObj.end(1);
             
         # Clean tokens: eliminate empty strings, all-caps, and punctuation-only strings:
         word = self.cleanToken(word);
-            
-        return (Token(TokenFeeder.currMsgID, TokenFeeder.currSentenceID, word));
-    
-
+        if word is None:
+            return None;
         
-    def isContraction(self, token):
-        matchObj = self.contractionTest.search(token);
+        # Is next word a contraction? (e.g. [this, 'll, blow, your, mind]).
+        # token iterator cursor will point to the comma after the 
+        # current word (e.g. the comma after 'this'):
+        contraction = self.isContraction(endOfToken);
+        if contraction is not None:
+            # Skip past the contraction:
+            self.tokenIt.next();
+            # Drop closing right bracket that's there if
+            # contraction was last token of sentence:
+            if contraction[-1] == ']':
+                word += contraction[0:-1];
+            else:
+                word += contraction;
+        
+        return (Token(TokenFromSentenceFeeder.currMsgID, TokenFromSentenceFeeder.currSentenceID, word));
+        
+    def isContraction(self, endOfCurrMatch):
+        '''
+        Returns a string containing the contraction, if 
+        a contraction token follows the given position in 
+        self.sentence. Else returns None. Example:
+        [this, 'll, blow, your, mind]. If endOfCurrMatch
+        is 5, then this method returns "'ll". 
+        @param endOfCurrMatch: index to the comma that follows the current token.
+        @type token: int
+        '''
+        matchObj = self.contractionTest.search(self.sentence, endOfCurrMatch);
+        # If we have no match, done:
         if matchObj is None:
             return None;
-        else:
-            try:
-                return(matchObj.group(1))
-            except IndexError:
-                print "Warning: token '%s' thought to be contraction, but wasn't." % token;
-                return None;
+        
+        contraction = matchObj.group(1);
+        # But is the contraction immediately following
+        # the passed-in starting position, rather than 
+        # several tokens further down? The passed-in
+        # endOfCurrMatch pts to the curr token's closing
+        # comma. The start pos of the contraction neeeds
+        # to be passed that comma and the space that follows
+        # that comma:
+        if matchObj.start(1) != endOfCurrMatch + 2:
+            return None;
+        return contraction;
 
     def isPunctuationOnly(self, token):
-        # Pattern: '[^,!;.?]'  # If None: only punctuation
+        # Pattern: '[^,!;.?[\]]'  # If None: only punctuation
         return not self.allPunctuationTest.search(token);
     
     def isCapsOnly(self, token):
@@ -171,13 +277,16 @@ class TokenFeeder(object):
         @type sentence: string
         '''
         
-        matchObj = TokenFeeder.messageSepTest.search(sentence);
+        matchObj = TokenFromSentenceFeeder.messageSepTest.search(sentence);
         if matchObj is None:
             return (None,None,None);
         else:
             # One of each pair of brackets below are not inserted. That's because they
             # come in as part of the matches:
-            return ('[' + matchObj.group(1), matchObj.group(2), matchObj.group(3) + ']');
+            currEmailTrailTokens = matchObj.group(1);
+            nextEmailID = matchObj.group(2);
+            nextEmailFrontTokens = matchObj.group(3);
+            return (currEmailTrailTokens, nextEmailID, nextEmailFrontTokens);
     
     def cleanToken(self, tokenStr):
         '''
@@ -197,10 +306,13 @@ class TokenFeeder(object):
         # Skip block-caps-only words (usually acronyms or callouts):
         if self.isPunctuationOnly(tokenStr) or self.isCapsOnly(tokenStr):
             return None;
-        else:
-            return tokenStr;
+        # Remove stopwords:
+        if tokenStr.lower() in STOPWORDS:
+            return None;
         
-# ---------------------------------------------- Class LineFeeder --------------------------
+        return tokenStr;
+        
+# ---------------------------------------------- Class SentenceFeeder --------------------------
 
 class SentenceFeeder(object):
     '''
@@ -232,7 +344,7 @@ class SentenceFeeder(object):
         @type dirToTokens: string
         '''
         if not os.path.isdir(dirToTokens):
-            raise ValueError("LineFeeder needs absolute path to directory with email token files.");
+            raise ValueError("SentenceFeeder needs absolute path to directory with email token files.");
         # Get all the chunk file names:
         allTokenFiles = os.listdir(dirToTokens);
         # Count the .txt files:
@@ -404,6 +516,12 @@ class WordPosting(object):
         self.followingCount = 1;
         self.wordPostingsIndex = -1;
 
+    def __repr__(self):
+        return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
+
+    def __str__(self):
+        return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
+
     def getRootWord(self):
         return self.rootWord;
     
@@ -442,38 +560,23 @@ class WordPosting(object):
 
 if __name__ == '__main__':
     
-#******** This part above testing is just a copy from make_clean_email_files.
-#         Update that when testing is done.
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("mailDirRoot", help="Root of dir tree with emails at leaves.");
+    parser = argparse.ArgumentParser(prog='make_database_from_emails')
+    parser.add_argument("tokenChunkFileDir", help="directory with chunk files of tokenized emails.");
+    parser.add_argument("-o", "--outputCSVPath", help="fully qualified path to ouput .csv file (gets overwritten). If omitted: tuples written to stdout.");    
+    parser.add_argument("-t", "--testing", action="store_true", dest="testing",
+                        help="flag to just run tests.");
     
-#    parser.add_argument("-m", "--maxBytes", type=int,
-#                        help="max number of bytes to process.");
-#    parser.add_argument("-c", "--clearHeaders", action="store_true",
-#                        help="flag to delete email headers.");
-#    parser.add_argument("-d", "--delRawFiles", action="store_true",
-#                        help="flag to delete raw email files if versions with no headers were created.");
-#    parser.add_argument("-t", "--testing", action="store_true",
-#                        help="flag to just run tests.");
-#    
-#    
-#    args = parser.parse_args()    
+    
+    args = parser.parse_args();
 
-#    emailOrganizer = EmailOrganizer(args.mailDirRoot, args.dbOutFile);
-#    collectedEmailsDir = os.path.dirname(os.path.realpath(args.dbOutFile));
-#    
-#        
-#    (numEmails, numBytes) = emailOrganizer.createEmailCollection(emailOrganizer.targetDBDir, 
-#                                                            filePrefix='email', 
-#                                                            maxContent=args.maxBytes, 
-#                                                            deleteEmailHeaders=args.clearHeaders, 
-#                                                            deleteFilesWithHeaders=args.delRawFiles);
-#    
-#    if numBytes < 1000000:
-#        print 'Processed %d emails (%.3f KB)' % (numEmails, numBytes / 1000);
-#    else:
-#        print 'Processed %d emails (%.3f MB)' % (numEmails, numBytes / 1000000);
-#    sys.exit();
+    if not args.testing:
+        tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
+        dbCreator = DBCreator(tokenChunkFilesDir, maxNumSentences=3);
+        # Word, FollowerWord, Count, EmailIDs, SentenceIDs
+        sys.exit();
+    else:
+        args.testing = None;
+
     
     # ------------------------------------------------------------------------------------------
     # The -t or --test option was given to the script implementation. Do unittesting:
@@ -494,17 +597,21 @@ if __name__ == '__main__':
             self.sentenceFeeder.ingestOneTokenFile();
             print self.sentenceFeeder.currContent[0:300];
 
-        def testTokenFeeder(self):
+        @unittest.skipIf(not testAll, 'Skipping testIngest')
+        def testTokenFromSentenceFeeder(self):
+            
+            # Single token:
             sentence = "[foo]" 
-            tokenFeeder = TokenFeeder(sentence);
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
             token = tokenFeeder.next();
             #print "MsgID: %d, SentenceID: %d, Word: %s" % (token.emailID, token.sentenceID, token.word);
             self.assertEqual(token.emailID, 0, "First msg id not zero: " + str(token.emailID));
             self.assertEqual(token.sentenceID, 0, "First sentence id not zero: " + str(token.sentenceID));
             self.assertEqual(token.word, 'foo', "First sentence word is not 'foo': " + str(token.word));
             
+            # Two tokens
             sentence = "[foo, bar]";
-            tokenFeeder = TokenFeeder(sentence);
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
             for i, token in enumerate(tokenFeeder):
                 #print "MsgID: %d, SentenceID: %d, Word: %s" % (token.emailID, token.sentenceID, token.word);
                 self.assertEqual(token.emailID, 0, "First msg id not zero: " + str(token.emailID));
@@ -514,23 +621,172 @@ if __name__ == '__main__':
                 else:
                     self.assertEqual(token.word, 'bar', "Second sentence word is not 'foo': " + str(token.word));
             
+            # Empty sentence:
             sentence = "[]";
-            tokenFeeder = TokenFeeder(sentence);
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
             for i, token in enumerate(tokenFeeder):
                 if i == 0:
-                    self.assertEqual(token.word, None, "First and only token out of an empty sentence should be None. Was '%s'" % token.word);
+                    self.assertEqual(token, None, "First and only token out of an empty sentence should be None. Was '%s'" % str(token));
                     continue;
                 self.fail("Received more than one token for an empty sentence: '%s' (i=%d)." % (str(token), i));
                 
-            sentence = "[%s]" % TokenFeeder.emailSep;
-            tokenFeeder = TokenFeeder(sentence);
+            # Email separator only:
+            sentence = "[%s]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
             for i, token in enumerate(tokenFeeder):
                 if i == 0:
-                    self.assertEqual(token.word, None, "First token should None for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token, None, "First token should be None for the (empty) sentence fragment before the sep. Was '%s'" % str(token));
                     continue;
                 if i == 1:
-                    self.assertEqual(token.word, None, "Second token should None for the (empty) sentence fragment after the sep. Was '%s'" % token.word);
+                    self.assertEqual(token, None, "Second token should be None for the (empty) sentence fragment after the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 3:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
              
+            # Email separator with one-word remainder in front:
+            sentence = "[foo, %s]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            # Pretend the email currently being processed has ID=4
+            TokenFromSentenceFeeder.currMsgID = 4; 
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, 'foo', "First token should 'foo' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 4, "EmailID should be 4. Was %d." % token.emailID);
+                    continue;
+                if i == 1:
+                    self.assertEqual(token, None, "Second token should be None for the end of the sentence fragment before the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 2:
+                    self.assertEqual(token, None, "Third token should None for the non-existing sentence frag after the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 3:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+            
+            # Email separator with two-word remainder in front:
+            sentence = "[foo, bar, %s]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            TokenFromSentenceFeeder.currMsgID = 4; 
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, 'foo', "First token should 'foo' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 4, "EmailID should be 4. Was %d." % token.emailID);
+                    continue;
+                if i == 1:
+                    self.assertEqual(token.word, 'bar', "Second token should 'bar' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 4, "EmailID should be 4. Was %d." % token.emailID);
+                    continue;
+                if i == 2:
+                    self.assertEqual(token, None, "Third token should None for the end of the sentence fragment before the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 3:
+                    self.assertEqual(token, None, "Fourth token should None for the non-existing sentence frag after the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 4:
+                    self.fail("Should not have had a Fifth round through loop.. Token was '%s'" % str(token));
+            
+            # Email separator with no trailing tokens from prev msg, but one token belonging to next msg:
+            sentence = "[%s, green]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            TokenFromSentenceFeeder.currMsgID = 4; 
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token, None, "First token should be None for the (empty) sentence fragment before the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 1:
+                    self.assertEqual(token.word, 'green', "First token should 'foo' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 5, "EmailID should be 5. Was %d." % token.emailID);                    
+                    continue;
+                if i == 2:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+            
+            # Email separator with no trailing tokens from prev msg, but one token belonging to next msg:
+            sentence = "[%s, green, red]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            TokenFromSentenceFeeder.currMsgID = 4; 
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token, None, "First token should be None for the (empty) sentence fragment before the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 1:
+                    self.assertEqual(token.word, 'green', "First token should 'green' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 5, "EmailID should be 5. Was %d." % token.emailID);                    
+                    continue;
+                if i == 2:
+                    self.assertEqual(token.word, 'red', "First token should 'red' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 5, "EmailID should be 5. Was %d." % token.emailID);                    
+                    continue;
+                if i == 3:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+                    
+            # Email separator with both leading and trailing tokens:
+            sentence = "[foo, %s, green, red]" % TokenFromSentenceFeeder.emailSep;
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            TokenFromSentenceFeeder.currMsgID = 4; 
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, 'foo', "First token should 'foo' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 4, "EmailID should be 4. Was %d." % token.emailID);
+                    continue;
+                if i == 1:
+                    self.assertEqual(token, None, "Second token should None for the end of the sentence fragment before the sep. Was '%s'" % str(token));
+                    continue;
+                if i == 2:
+                    self.assertEqual(token.word, 'green', "First token should 'green' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 5, "EmailID should be 5. Was %d." % token.emailID);                    
+                    continue;
+                if i == 3:
+                    self.assertEqual(token.word, 'red', "First token should 'red' for the (empty) sentence fragment before the sep. Was '%s'" % token.word);
+                    self.assertEqual(token.emailID, 5, "EmailID should be 5. Was %d." % token.emailID);                    
+                    continue;
+                if i == 4:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+                    
+            # Contraction at start of sentence:
+            sentence = "[this, 'll, blow]";
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, "this'll", "Expected 'this', got '%s'." % token.word);
+                    continue;
+                if i == 1:
+                    self.assertEqual(token.word, 'blow', "Expected 'this', got '%s'." % token.word);
+                    continue;
+                if i == 2:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+                
+                
+            # Contraction in middle of sentence:
+            sentence = "[foo, this, 'll, blow]";
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, 'foo', "Expected 'this', got '%s'." % token.word);
+                    continue;
+                if i == 1:
+                    self.assertEqual(token.word, "this'll", "Expected 'this', got '%s'." % token.word);
+                    continue;
+                if i == 2:
+                    self.assertEqual(token.word, 'blow', "Expected 'this', got '%s'." % token.word);
+                    continue;
+                if i == 3:
+                    self.fail("Should not have had a third round through loop.. Token was '%s'" % str(token));
+            
+            # Contraction at end of sentence:
+            sentence = "[this, 'll]";
+            tokenFeeder = TokenFromSentenceFeeder(sentence);
+            for i, token in enumerate(tokenFeeder):
+                if i == 0:
+                    self.assertEqual(token.word, "this'll", "Expected 'this'll', got '%s'." % token.word);
+                if i == 2:
+                    self.fail("Should not have had a second round through loop.. Token was '%s'" % str(token));
+                    continue;
+                
+        # Contraction at end of sentence:                
+        def testTokenFeeder(self):
+            tokenDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Resources/EnronCollectionProcessed/EnronTokenized");                       
+            for token in TokenFeeder(tokenDir, maxNumSentences=3):
+                print(str(token));
+            
             
     unittest.main();
 
