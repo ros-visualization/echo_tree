@@ -9,11 +9,13 @@ from collections import OrderedDict
 
 # TODO:
 
-STOPWORDS = ['the', 'of', 'and', 'to', 'in', 'I', 'that', 'was', 'his', 'he', 'it', 'is', 'for', 'as', 'had', 'on', 'at', 'by', 'this', 'are', 'an', 'has', 'its', 'a', 'these', 'mr'];
+STOPWORDS = ['the', 'of', 'and', 'to', 'in', 'I', 'that', 'was', 'his', 'he', 'it', 'is', 'for',
+             'as', 'had', 'on', 'at', 'by', 'this', 'are', 'an', 'has', 'its', 'a', 'these', 'mr',
+             'you'];
 
 class DBCreator(object):
 
-    def __init__(self, dirToTokens, outFileName, maxNumSentences=None, logFile=None):
+    def __init__(self, dirToTokens, outFileName=None, maxNumSentences=None, logFile=None):
         
         
         if not os.path.isdir(dirToTokens):
@@ -32,22 +34,23 @@ class DBCreator(object):
             self.logFD = sys.stdout;
     
         # Ensure that we will be able to open the output file
-        # before we do a bunch of work: 
-        try:
-            fd = open(outFileName,'w');
-            fd.close();
-        except IOError:
-            raise IOError("Cannot open output file %s for writing." % outFileName);
+        # before we do a bunch of work, unless outputFile is None,
+        # in which case we'll write to stdout:
+        if outFileName is not None: 
+            try:
+                fd = open(outFileName,'w');
+                fd.close();
+            except IOError:
+                raise IOError("Cannot open output file %s for writing." % outFileName);
         
         # (WordIndex is a static method, so no instantiation)
         tokenFeeder = TokenFeeder(dirToTokens, maxNumSentences=maxNumSentences);
         currToken = tokenFeeder.next();
         # For progress reporting:
         msgsProcessed = 0;
-        msgsProcessedSinceReporting = 0;
+        msgsSinceLastReported = 0;
         #LOG_MSG_INTERVAL = 1000
         LOG_MSG_INTERVAL = 2
-        nxtMsgReportAfter = LOG_MSG_INTERVAL;
         currMsgID = 0;
         try:
             for token in tokenFeeder:
@@ -64,11 +67,11 @@ class DBCreator(object):
                     currPosting.addFollowsWord(nextPosting, nextToken.sentenceID, nextToken.emailID);
                 currToken = nextToken;
                 if currToken.emailID != currMsgID:
-                    msgsProcessedSinceReporting += 1;
-                    if msgsProcessedSinceReporting >= nxtMsgReportAfter:
-                        msgsProcessed += msgsProcessedSinceReporting;
-                        nxtMsgReportAfter = msgsProcessed + LOG_MSG_INTERVAL;
-                        msgsProcessedSinceReporting = 0;
+                    currMsgID = currToken.emailID;
+                    msgsProcessed += 1;
+                    msgsSinceLastReported += 1;
+                    if msgsSinceLastReported >= LOG_MSG_INTERVAL:
+                        msgsSinceLastReported = 0;
                         self.log("Processed %d emails..." % msgsProcessed);
         except StopIteration:
             pass
@@ -76,9 +79,13 @@ class DBCreator(object):
         self.log("Done creating in-memory index. Writing to csv file...");
 
         # Build the CSV file:
-        with open(outFileName, 'w') as csvFD:
+        try:
+            if outFileName is not None:
+                csvFD = open(outFileName,'w');
+            else:
+                csvFD = sys.stdout;
             # The column headers:
-            csvFD.write("Word,Follower,FollowersCount,MetaWordCount,MetaNumSuccessors,MetaNumSentenceOcc,MetaNumMsgOcc\n");
+            csvFD.write("Word,Follower,FollowersCount,MetaNumSuccessors,MetaNumSentenceOcc,MetaNumMsgOcc\n");
             for wordPosting in WordIndex.__iter__():
                 word = wordPosting.getRootWord();
                 # Write the summary information about this word:
@@ -87,8 +94,6 @@ class DBCreator(object):
                             ',' +\
                             # No FollowersCount
                             ',' +\
-                            # MetaWordCount:
-                            str(wordPosting.getNumOccurrences()) + ',' +\
                             # MetaNumSuccessors:
                             str(wordPosting.getNumFollowers()) + ',' +\
                             # Num of sentences in which word occurrs:
@@ -96,9 +101,30 @@ class DBCreator(object):
                             # Num of email msgs in which word occurs:
                             str(wordPosting.getNumOfEmailOccurrences()) +\
                             '\n');
-                                                          
-        self.log("Done.");
-        self.logFD.close();
+                # Write one line for each follower:
+                for followerWordPosting in wordPosting:
+                    csvFD.write(word + ',' +\
+                                followerWordPosting.getRootWord() + ',' +\
+                                str(followerWordPosting.getNumOccurrences()) +\
+                                # No MetaWordCount:
+                                ',' +\
+                                # No MetaNumSuccessors:
+                                ',' +\
+                                # No MetaNumSentenceOcc,
+                                ',' +\
+                                # No MetaNumMsgOcc:
+                                ',' +\
+                                '\n');
+                    
+        finally:
+            if outFileName is not None:
+                csvFD.close();
+            if self.logFile is not None:
+                self.log("Done.");
+                self.logFD.close();
+            else:
+                print "Done.";
+        
     
     def log(self, msg):
         print >>self.logFD, msg; 
@@ -227,8 +253,15 @@ class TokenFromSentenceFeeder(object):
                 # Remember the start of the next email message on the 
                 # far side of the email message separator:
                 self.fragNextMessage = sentenceFrontEnd;
-                # The ID of the upcoming message: 
-                self.nextMsgID = int(nextEmailID);
+                # The ID of the upcoming message:
+                try: 
+                    self.nextMsgID = int(nextEmailID);
+                except ValueError as e:
+                    # Email recognition fails when two message headers are in
+                    # a single sentence. In that case, nextEmailID is an empty
+                    # string. We just bump the latest msg ID we know about:
+                    self.nextMsgID = TokenFromSentenceFeeder.currMsgID + 1;
+                    print "Warning: Bad emailID extraction (bumping old ID to recover): '%s'. Tail:'%s'. Front:'%s'.CurrMsgID: '%s'." % (nextEmailID,sentenceTrail,sentenceFrontEnd, self.currMsgID);
                 self.tokenIt = TokenFromSentenceFeeder.tokenExtractPattern.finditer(sentenceTrail);
                 
         try:
@@ -421,7 +454,7 @@ class SentenceFeeder(object):
             try:
                 serialNum = int(serialNumStr);
             except ValueError:
-                raise ValueError("Could not extract email chunk file serial number from file name '%s'. Extraction got '%s" % (chunkFileName, serialNumStr));
+                raise ValueError("Could not extract email chunk file serial number from file name '%s'. Extraction got '%s'" % (chunkFileName, serialNumStr));
             self.sortedTokenChunks[serialNum] = os.path.join(dirToTokens, chunkFileName);
         
         self.currFileIndex = 0;
@@ -612,10 +645,14 @@ class WordPosting(object):
 
     def getNumOccurrences(self):
         '''
+        Return number of times this posting's word occurred in the emails.
+        This is roughly the same as the number of followers. We'll just
+        go with that *approximation*. It leaves out occurrences of the word
+        at the end of emails.
         @return: total number of this word's occurrences.
         @rtype: int
         '''
-        return self.followingCount;
+        return self.getNumFollowers();
     
     def getNumFollowers(self):
         '''
@@ -663,7 +700,7 @@ class WordPosting(object):
         self.inEmail.add(currentEmailID);
         
     def __iter__(self):
-        self.rootWords = WordIndex.allPostings.keys();
+        self.rootWords = self.wordPostingsDict.keys();
         return self;
     
     def next(self): #@ReservedAssignment
@@ -676,7 +713,10 @@ class WordPosting(object):
         self.wordPostingsIndex += 1;
         if self.wordPostingsIndex >= len(self.rootWords):
             raise StopIteration;
-        return WordIndex.allPostings[self.wordPostingsIndex];
+        # Get next root word from the keys of self.wordPostingsDict array,
+        # and return that word's posting in the WordIndex
+        nextFollowerWord = self.rootWords[self.wordPostingsIndex]; 
+        return WordIndex.getPosting(nextFollowerWord);
         
 # -----------------------  Testing ------------------------
 
@@ -692,9 +732,13 @@ if __name__ == '__main__':
     args = parser.parse_args();
 
     if not args.testing:
-        tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
-        dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', maxNumSentences=10, logFile='/tmp/myLog.txt');
-        # Word, FollowerWord, Count, EmailIDs, SentenceIDs
+        logFileDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed');
+        logFile    = os.path.join(logFileDir,'enronDBCreation.log');
+        DBCreator(args.tokenChunkFileDir, args.outputCSVPath, logFile=logFile);
+        #tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
+#        tokenChunkFilesDir = "/home/paepcke/tmp/TokenTest"
+#        #dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', maxNumSentences=10, logFile='/tmp/myLog.txt');
+#        dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', logFile='/tmp/myLog.txt');
         sys.exit();
     else:
         args.testing = None;
