@@ -20,6 +20,44 @@
 
            ./tokenizeCleanEmails.sh
 
+     Step3: Using the set of tokenized sentence files of Step2, create
+     a CSV file with the following columns:
+
+          "Word,Follower,FollowersCount,MetaNumSuccessors,MetaNumSentenceOcc,MetaNumMsgOcc"
+
+     Word: one word from an email; stopwords eliminated (see list of
+           stopwords below). This col is *not* unique.
+     Follower: one word that followed Word on one occasion.
+     FollowersCount: number of times Follower has followed Word
+     MetaNumSuccessors: total number of distinct successors to Word
+     MetaNumSentenceOcc: number of sentences in which Word occurs
+     MetaNumMsgOcc: number of email messages in which Word occurred
+
+     For each word there is exactly one entrance with the Metaxxx
+     columns filled in. That row has empty Follower and FollowersCount
+     columns. There are then separate rows for each Word/Follower
+     pair, in which the Metaxxx columns are empty
+
+     Create theis csv like this:
+
+      ./make_database_from_emails.py -o <outputCSVFile> <dirWithTokenizedSentences>
+
+     Within the source tree I did:
+
+      mkdir Resources/EnronCollectionProcessed/EnronDB
+      ./make_database_from_emails.py -o \
+                      Resources/EnronCollectionProcessed/EnronDB/enronDB.csv \
+		      Resources/EnronCollectionProcessed/EnronDB/enronTokenized
+ 
+     This run takes 8 hours on an 8-core/16GB machine. However, the
+     data structure built in memory throws away two expensive lists
+     for each words that don't make it into any csv file: for each
+     word the program creates a list of unique sentence IDs and unique
+     email IDs in which that word occurred. Only those lists' length
+     is written to the csv file (MetaNumSentenceOcc,
+     MetaNumMsgOcc). Only collecting those counts would presumably
+     speed up the db creation.
+
 - The tokenization/sentence segmentation is done using Stanford NLP
   core. Separate package: echo_tree_sentence_seg. Use Eclipse over
   that Maven project to create target/emailTokenizer.jar. Copy that
@@ -29,7 +67,10 @@
 
 - Enron data:
     o 531,422 messages
-    o 2.624GB of total length
+    o 2.624GB of total length of email files
+    o enronDB has 7,332,416 entries (that's larger than the word
+        count!)
+
 
 - Full run:
     Processed 517424 emails (1421.000 MB)
