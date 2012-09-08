@@ -49,8 +49,7 @@ class DBCreator(object):
         # For progress reporting:
         msgsProcessed = 0;
         msgsSinceLastReported = 0;
-        #LOG_MSG_INTERVAL = 1000
-        LOG_MSG_INTERVAL = 2
+        LOG_MSG_INTERVAL = 1000
         currMsgID = 0;
         try:
             for token in tokenFeeder:
