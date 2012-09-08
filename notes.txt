@@ -79,14 +79,21 @@
 	            d
 	            '
 	         $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
-          Also, several individual entries confused SQlite. Ex: 
-          Fixes along that line: deletes:
-                 sed -i '3595077d' $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
 
-          Other lines: 
-                 3665954
-		 3665953
+   Step6: Import into SQLite:
+        * In RazorSQL: do Import->CSV
+				Separator: <comma>
+				First-line = 2
+				Don't include header names
+				Do pad missing values with null
+                        Output SQL to a file only: csvImportStatements.sql
 
+	* In Emacs:     add 
+			   'BEGIN TRANSACTION' and 'COMMIT TRANSACTION'
+                           to the start and end fo the buffer,
+
+ 	* In shell:     sqliteShell enronDB.db < csvImportStatements.sql
+                           takes a few minutes.
        
 
 - The tokenization/sentence segmentation is done using Stanford NLP
@@ -100,6 +107,9 @@
     o 2.624GB of total length of email files
     o enronDB has 7,332,416 entries (that's larger than the word
         count!)
+    o Final DB:
+       * 3,881,632 rows (not same as unique words!)
+
 
 - Full run:
     Processed 517424 emails (1421.000 MB)
