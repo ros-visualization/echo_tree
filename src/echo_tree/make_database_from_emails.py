@@ -104,7 +104,7 @@ class DBCreator(object):
                 for followerWordPosting in wordPosting:
                     csvFD.write(word + ',' +\
                                 followerWordPosting.getRootWord() + ',' +\
-                                str(followerWordPosting.getNumOccurrences()) +\
+                                str(followerWordPosting.getNumFollowers()) +\
                                 # No MetaWordCount:
                                 ',' +\
                                 # No MetaNumSuccessors:
@@ -112,7 +112,7 @@ class DBCreator(object):
                                 # No MetaNumSentenceOcc,
                                 ',' +\
                                 # No MetaNumMsgOcc:
-                                ',' +\
+                                #',' +\  # this adds an extra comma, making Sqlite think there are 7 cols.
                                 '\n');
                     
         finally:

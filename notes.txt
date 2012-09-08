@@ -28,7 +28,7 @@
      Word: one word from an email; stopwords eliminated (see list of
            stopwords below). This col is *not* unique.
      Follower: one word that followed Word on one occasion.
-     FollowersCount: number of times Follower has followed Word
+     FollowersCount: number of distinct words that followed Word
      MetaNumSuccessors: total number of distinct successors to Word
      MetaNumSentenceOcc: number of sentences in which Word occurs
      MetaNumMsgOcc: number of email messages in which Word occurred
@@ -58,19 +58,48 @@
      MetaNumMsgOcc). Only collecting those counts would presumably
      speed up the db creation.
 
+   [Step4: Due to a bug that is now fixed, an additional comma was in
+          the original csv. Any newly created csv file does not need
+          this step:
+
+       #!/bin/bash
+       sed -i 's/,,,,$/,,,/g' $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
+   ]
+   Step5: Due to a bug, 465 lines in enronDB.csv were not proper
+          csv entries, but raw text. I eliminated them via this
+          script
+
+	         #!/bin/bash
+                 # -i replaces matches in place, i.e. within the file:
+	         sed -i '
+	            # If line has exactly five commas with non-commas
+	  	  # in between, then that line is good: go to the next 
+	            # line. Else fall through to the delete-line ('d'):
+	            /[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,/n
+	            d
+	            '
+	         $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
+          Also, several individual entries confused SQlite. Ex: 
+          Fixes along that line: deletes:
+                 sed -i '3595077d' $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
+
+          Other lines: 
+                 3665954
+		 3665953
+
+       
+
 - The tokenization/sentence segmentation is done using Stanford NLP
   core. Separate package: echo_tree_sentence_seg. Use Eclipse over
   that Maven project to create target/emailTokenizer.jar. Copy that
   jar file into ... echo_tree/src/bash_scripts. (Already done in a
   cloned project.
 
-
 - Enron data:
     o 531,422 messages
     o 2.624GB of total length of email files
     o enronDB has 7,332,416 entries (that's larger than the word
         count!)
-
 
 - Full run:
     Processed 517424 emails (1421.000 MB)
@@ -106,6 +135,18 @@ a
 these
 mr
 
+- Database creation command:
+create table EnronWords (
+   word text,
+   follower text,
+   followersCount int,
+   metaNumSuccessors int,
+   metaNumSentenceOcc int,
+   metaNumMsgOcc int
+);
+
+.mode csv
+.import enronDB.csv EnronWords
 
 
 
