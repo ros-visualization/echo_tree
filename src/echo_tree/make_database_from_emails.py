@@ -731,9 +731,12 @@ if __name__ == '__main__':
     args = parser.parse_args();
 
     if not args.testing:
+        #Uncomment this block for real run
         logFileDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed');
         logFile    = os.path.join(logFileDir,'enronDBCreation.log');
         DBCreator(args.tokenChunkFileDir, args.outputCSVPath, logFile=logFile);
+        
+        
         #tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
 #        tokenChunkFilesDir = "/home/paepcke/tmp/TokenTest"
 #        #dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', maxNumSentences=10, logFile='/tmp/myLog.txt');
@@ -750,6 +753,7 @@ if __name__ == '__main__':
     import shutil
     
     testAll = False;
+    
     
     class TestSuite(unittest.TestCase):
                 
