@@ -46,13 +46,13 @@ class DBCreator(object):
         # (WordIndex is a static method, so no instantiation)
         tokenFeeder = TokenFeeder(dirToTokens, maxNumSentences=maxNumSentences);
         currToken = tokenFeeder.next();
-        # For progress reporting:
+        # For progress reporting:        
         msgsProcessed = 0;
         msgsSinceLastReported = 0;
         LOG_MSG_INTERVAL = 1000
         currMsgID = 0;
         try:
-            for token in tokenFeeder:
+            while 1:
                 nextToken = tokenFeeder.next();
                 currPosting = WordIndex.getPosting(currToken.word);
                 if currPosting is None:
@@ -60,31 +60,33 @@ class DBCreator(object):
                     # This posting is at the top level of the index.
                     # Set the respective flag to True. This will 
                     # change somne of the wordPosting's behavior:
-                    currPosting.isTopLevelPosting = True;
-                    # The count is set to
-                    currPosting.initOccurrenceInCollection();
+                    currPosting.setPostingTopLevel();
                     WordIndex.addPosting(currPosting);
                 else:
                     # Found this token before, bump its count:
-                    currPosting.bumpOccurrenceInCollection();
+                    # Was this posting created last loop around
+                    # in the nextPosting = ... below. In that
+                    # case, just init this posting's counter, else
+                    # if the posting is already marked as top level,
+                    # it was seen before, and we just bump the global
+                    # occurrence counter:
+                    if currPosting.isTopLevelPosting:
+                        currPosting.bumpOccurrenceInCollection();
+                    else:
+                        currPosting.setPostingTopLevel();
+                        
                 nextPosting = WordIndex.getPosting(nextToken.word);
                 if nextPosting is None:
                     nextPosting = WordPosting(nextToken.word);
-                    # This posting is at the top level of the index.
-                    # Set the respective flag to True. This will 
-                    # change somne of the wordPosting's behavior:
-                    nextPosting.isTopLevelPosting = True;
-                    currPosting.initOccurrenceInCollection();                    
                     WordIndex.addPosting(nextPosting);
-                else:
-                    nextPosting.bumpOccurrenceInCollection();
                 if nextToken.sentenceID == currToken.sentenceID:
                     # Make a new posting for this follow-on word. That new
                     # posting will live in currPosting's dict of followers,
                     # and will have its own occurrence count. That count is
                     # separate from the overall count kept in currPosting:
                     followerWordPosting = WordPosting(nextPosting.rootWord);
-                    followerWordPosting.initFollowingCount();
+                    # We don't init this new posting's total occurrence counter,
+                    # b/c that will hapen next time around the loop:
                     currPosting.addFollowsWord(followerWordPosting);
                 currToken = nextToken;
                 if currToken.emailID != currMsgID:
@@ -128,14 +130,12 @@ class DBCreator(object):
                     csvFD.write(word + ',' +\
                                 followerWordPosting.getRootWord() + ',' +\
                                 str(followerWordPosting.getHowOftenIFollowed()) +\
-                                # No MetaWordCount:
+                                # No MetaNumOccurrences:
                                 ',' +\
                                 # No MetaNumSuccessors:
                                 ',' +\
-                                # No MetaNumSentenceOcc,
+                                # No MetaWordLenth:
                                 ',' +\
-                                # No MetaNumMsgOcc:
-                                #',' +\  # this adds an extra comma, making Sqlite think there are 7 cols.
                                 '\n');
                     
         finally:
@@ -150,6 +150,7 @@ class DBCreator(object):
     
     def log(self, msg):
         print >>self.logFD, msg; 
+        self.logFD.flush();
         
 # ---------------------------------------------- Class TokenFeeder  --------------------------
 
@@ -656,23 +657,22 @@ class WordPosting(object):
         self.wordPostingsDict = OrderedDict();
         #self.inSentence = set([sentenceID]);
         #self.inEmail = set([emailMsgID]);
-        self.followingCount = -1;
+        self.followingCount = 1;
         self.numOccInCollection = -1;
         self.wordPostingsIndex = -1;
         self.isTopLevelPosting = False;
-        
-    def initOccurrenceInCollection(self):
-        self.numOccInCollection = 1;
-        
-    def initFollowingCount(self):
-        self.followingCount = 1;
-
+     
     def __repr__(self):
         return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
 
     def __str__(self):
         return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
 
+    def setPostingTopLevel(self):
+        self.numOccInCollection = 1;
+        self.followingCount = -1;
+        self.isTopLevelPosting = True;
+       
     def bumpOccurrenceInCollection(self):
         '''
         Only called by WordIndex when a word is found (again).
@@ -772,7 +772,8 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(prog='make_database_from_emails')
     parser.add_argument("tokenChunkFileDir", help="directory with chunk files of tokenized emails.");
-    parser.add_argument("-o", "--outputCSVPath", help="fully qualified path to ouput .csv file (gets overwritten). If omitted: tuples written to stdout.");    
+    parser.add_argument("-o", "--outputCSVPath", help="fully qualified path to ouput .csv file (gets overwritten). If omitted: tuples written to stdout.", dest='outputCSVPath');
+    parser.add_argument("-l", "--logFile, help=fully qualified log file name. Default is stdout.", dest='logFile');
     parser.add_argument("-t", "--testing", action="store_true", dest="testing",
                         help="flag to just run tests.");
     
@@ -780,17 +781,27 @@ if __name__ == '__main__':
     args = parser.parse_args();
 
     if not args.testing:
-        #Uncomment this block for real run
-        logFileDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed');
-        logFile    = os.path.join(logFileDir,'enronDBCreation.log');
-        DBCreator(args.tokenChunkFileDir, args.outputCSVPath, logFile=logFile);
-        
+        #logFileDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed');
+        #logFile    = os.path.join(logFileDir,'enronDBCreation.log');
+
+        try:
+            logFile = args.logFile;
+        except AttributeError:
+            logFile = None;
+        try:
+            outputCSVPath = args.outputCSVPath;
+        except AttributeError:
+            outputCSVPath = None;
+# Uncomment here...            
+        DBCreator(args.tokenChunkFileDir, outputCSVPath, logFile=logFile);
+        sys.exit();
+# ... to here...
         
         #tokenChunkFilesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Resources/EnronCollectionProcessed/EnronTokenized');
 #        tokenChunkFilesDir = "/home/paepcke/tmp/TokenTest"
 #        #dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', maxNumSentences=10, logFile='/tmp/myLog.txt');
 #        dbCreator = DBCreator(tokenChunkFilesDir, '/tmp/outTest.csv', logFile='/tmp/myLog.txt');
-        sys.exit();
+#        sys.exit();
     else:
         args.testing = None;
 
@@ -803,7 +814,8 @@ if __name__ == '__main__':
     
     testAll = False;
 
-#    DBCreator(args.tokenChunkFileDir, args.outputCSVPath, maxNumSentences=2000);
+#    #DBCreator(args.tokenChunkFileDir, outputCSVPath, logFile=logFile, maxNumSentences=1000);
+#    DBCreator(args.tokenChunkFileDir, outputCSVPath, logFile=logFile);
 #    sys.exit()
     
     class TestSuite(unittest.TestCase):

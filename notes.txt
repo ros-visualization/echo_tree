@@ -80,7 +80,21 @@
 	            '
 	         $HOME/fuerte/stacks/echo_tree/src/echo_tree/Resources/EnronCollectionProcessed/EnronDB/enronDB.csv
 
-   Step6: Import into SQLite:
+   Step6: Database creation command:
+
+       In sqliteScript (a compiled version of sqlite3 with large files
+       turned on; see worstation notes.):
+
+       create table EnronWords (
+          word text,
+          follower text,
+          followingCount int,
+          metaNumSuccessors int,
+          metaWordLen int
+       );            
+
+
+   Step7: Import into SQLite:
         * In RazorSQL: do Import->CSV
 				Separator: <comma>
 				First-line = 2
@@ -144,16 +158,6 @@ its
 a
 these
 mr
-
-- Database creation command:
-create table EnronWords (
-   word text,
-   follower text,
-   followersCount int,
-   metaNumSuccessors int,
-   metaNumSentenceOcc int,
-   metaNumMsgOcc int
-);
 
 .mode csv
 .import enronDB.csv EnronWords
