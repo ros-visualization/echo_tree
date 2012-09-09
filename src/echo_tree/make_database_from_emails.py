@@ -56,14 +56,36 @@ class DBCreator(object):
                 nextToken = tokenFeeder.next();
                 currPosting = WordIndex.getPosting(currToken.word);
                 if currPosting is None:
-                    currPosting = WordPosting(currToken.word, currToken.sentenceID, currToken.emailID);
+                    currPosting = WordPosting(currToken.word);
+                    # This posting is at the top level of the index.
+                    # Set the respective flag to True. This will 
+                    # change somne of the wordPosting's behavior:
+                    currPosting.isTopLevelPosting = True;
+                    # The count is set to
+                    currPosting.initOccurrenceInCollection();
                     WordIndex.addPosting(currPosting);
+                else:
+                    # Found this token before, bump its count:
+                    currPosting.bumpOccurrenceInCollection();
                 nextPosting = WordIndex.getPosting(nextToken.word);
                 if nextPosting is None:
-                    nextPosting = WordPosting(nextToken.word, nextToken.sentenceID, nextToken.emailID);
+                    nextPosting = WordPosting(nextToken.word);
+                    # This posting is at the top level of the index.
+                    # Set the respective flag to True. This will 
+                    # change somne of the wordPosting's behavior:
+                    nextPosting.isTopLevelPosting = True;
+                    currPosting.initOccurrenceInCollection();                    
                     WordIndex.addPosting(nextPosting);
+                else:
+                    nextPosting.bumpOccurrenceInCollection();
                 if nextToken.sentenceID == currToken.sentenceID:
-                    currPosting.addFollowsWord(nextPosting, nextToken.sentenceID, nextToken.emailID);
+                    # Make a new posting for this follow-on word. That new
+                    # posting will live in currPosting's dict of followers,
+                    # and will have its own occurrence count. That count is
+                    # separate from the overall count kept in currPosting:
+                    followerWordPosting = WordPosting(nextPosting.rootWord);
+                    followerWordPosting.initFollowingCount();
+                    currPosting.addFollowsWord(followerWordPosting);
                 currToken = nextToken;
                 if currToken.emailID != currMsgID:
                     currMsgID = currToken.emailID;
@@ -84,7 +106,8 @@ class DBCreator(object):
             else:
                 csvFD = sys.stdout;
             # The column headers:
-            csvFD.write("Word,Follower,FollowersCount,MetaNumSuccessors,MetaNumSentenceOcc,MetaNumMsgOcc\n");
+            # FollowersCount is number of times a given word followed a given other word:
+            csvFD.write("Word,Follower,FollowersCount,MetaNumOccurrences,MetaNumSuccessors,MetaWordLength\n");
             for wordPosting in WordIndex.__iter__():
                 word = wordPosting.getRootWord();
                 # Write the summary information about this word:
@@ -93,18 +116,18 @@ class DBCreator(object):
                             ',' +\
                             # No FollowersCount
                             ',' +\
+                            # MetaNumOccurrences:
+                            str(wordPosting.getNumOccurrences()) + ',' +\
                             # MetaNumSuccessors:
                             str(wordPosting.getNumFollowers()) + ',' +\
-                            # Num of sentences in which word occurrs:
-                            str(wordPosting.getNumOfSentenceOccurrences()) + ',' +\
-                            # Num of email msgs in which word occurs:
-                            str(wordPosting.getNumOfEmailOccurrences()) +\
+                            # MetaWordLength:
+                            str(len(wordPosting.getRootWord())) +\
                             '\n');
                 # Write one line for each follower:
                 for followerWordPosting in wordPosting:
                     csvFD.write(word + ',' +\
                                 followerWordPosting.getRootWord() + ',' +\
-                                str(followerWordPosting.getNumFollowers()) +\
+                                str(followerWordPosting.getHowOftenIFollowed()) +\
                                 # No MetaWordCount:
                                 ',' +\
                                 # No MetaNumSuccessors:
@@ -529,10 +552,9 @@ class WordIndex(object):
         '''
         posting = WordIndex.getPosting(wordPosting) 
         if posting is None:
+            # wordPosting was not yet in the index: insert it:
             WordIndex.allPostings[wordPosting.getRootWord()] = wordPosting;
             return True;
-        # Word was already in index; bump its count:
-        wordPosting.followingCount += 1;
         return False;
     
     @staticmethod
@@ -628,13 +650,22 @@ class WordPosting(object):
     May be used as an iterator: for followPosting in oneWordPosting:...
     '''
     
-    def __init__(self, word, sentenceID, emailMsgID):
+    #def __init__(self, word, sentenceID, emailMsgID):
+    def __init__(self, word):
         self.rootWord = word;
         self.wordPostingsDict = OrderedDict();
-        self.inSentence = set([sentenceID]);
-        self.inEmail = set([emailMsgID]);
-        self.followingCount = 1;
+        #self.inSentence = set([sentenceID]);
+        #self.inEmail = set([emailMsgID]);
+        self.followingCount = -1;
+        self.numOccInCollection = -1;
         self.wordPostingsIndex = -1;
+        self.isTopLevelPosting = False;
+        
+    def initOccurrenceInCollection(self):
+        self.numOccInCollection = 1;
+        
+    def initFollowingCount(self):
+        self.followingCount = 1;
 
     def __repr__(self):
         return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
@@ -642,16 +673,39 @@ class WordPosting(object):
     def __str__(self):
         return "<WordPosting: %s %d followers following %d (%d)>" % (self.rootWord, len(self.wordPostingsDict.keys()), self.followingCount, id(self));
 
+    def bumpOccurrenceInCollection(self):
+        '''
+        Only called by WordIndex when a word is found (again).
+        This is greater than 1 only for the top level WordPosting within
+        WordIndex
+        '''
+        if self.isTopLevelPosting:
+            self.numOccInCollection += 1;
+
     def getNumOccurrences(self):
         '''
-        Return number of times this posting's word occurred in the emails.
-        This is roughly the same as the number of followers. We'll just
-        go with that *approximation*. It leaves out occurrences of the word
-        at the end of emails.
-        @return: total number of this word's occurrences.
+        Return number of times this posting's word occurred in the emails total.
+        @return: total number of this word's occurrences. Or -1, if this WordPosting
+                 is not a top level posting in WordIndex.
         @rtype: int
         '''
-        return self.getNumFollowers();
+        if self.isTopLevelPosting:
+            return self.numOccInCollection;
+        else:
+            return -1;
+    
+    def getHowOftenIFollowed(self):
+        '''
+        Returns how often this WordPosting W's rootWord followed the 
+        WordPosting in whose wordPostingsDict W is listed as a follower.
+        I.e. this number is how often this word followed a particular
+        other word. If this WordPosting is not top level in WordIndex,
+        method returns -1.
+        '''
+        if not self.isTopLevelPosting:
+            return self.followingCount;
+        else:
+            -1;
     
     def getNumFollowers(self):
         '''
@@ -660,43 +714,38 @@ class WordPosting(object):
         '''
         return len(self.wordPostingsDict.keys());
     
-    def getNumOfEmailOccurrences(self):
-        '''
-        @return: number of emails  in which this word occurred.
-        @rtype: int
-        '''
-        return len(self.inEmail);
-    
-    def getNumOfSentenceOccurrences(self):
-        '''
-        @return: number of sentences  in which this word occurred.
-        @rtype: int
-        '''
-        return len(self.inSentence);
+#    def getNumOfEmailOccurrences(self):
+#        '''
+#        @return: number of emails  in which this word occurred.
+#        @rtype: int
+#        '''
+#        return len(self.inEmail);
+#    
+#    def getNumOfSentenceOccurrences(self):
+#        '''
+#        @return: number of sentences  in which this word occurred.
+#        @rtype: int
+#        '''
+#        return len(self.inSentence);
 
     def getRootWord(self):
         return self.rootWord;
     
-    def addFollowsWord(self, newFollowWordPosting, currentSentenceID, currentEmailID):
+    def addFollowsWord(self, newFollowWordPosting):
         '''
         Given a posting that follows this word, and a sentence ID for context,
         add the new posting into the wordPostingsDict. Also add the sentence ID
         into the inSentence set.
         @param newFollowWordPosting: WordPosting to be added as a follower.
         @type newFollowWordPosting: WordPosting
-        @param currentSentenceID: ID of sentence in which the new word followed.
-        @type currentSentenceID: int
-        @param currentEmailID: ID of email message in which new word occurred.
-        @type: currentEmailID: int
         '''
         try:
             # Does this follow-word already exist in this posting's follow-words?
             myFollowPosting = self.wordPostingsDict[newFollowWordPosting.getRootWord()];
+            # The new word has followed this WordPosting index's root word before. Keep count:
             myFollowPosting.followingCount += 1;
         except KeyError:
             self.wordPostingsDict[newFollowWordPosting.getRootWord()] = newFollowWordPosting;
-        self.inSentence.add(currentSentenceID);
-        self.inEmail.add(currentEmailID);
         
     def __iter__(self):
         self.rootWords = self.wordPostingsDict.keys();
@@ -715,7 +764,7 @@ class WordPosting(object):
         # Get next root word from the keys of self.wordPostingsDict array,
         # and return that word's posting in the WordIndex
         nextFollowerWord = self.rootWords[self.wordPostingsIndex]; 
-        return WordIndex.getPosting(nextFollowerWord);
+        return self.wordPostingsDict[nextFollowerWord];
         
 # -----------------------  Testing ------------------------
 
@@ -753,7 +802,9 @@ if __name__ == '__main__':
     import shutil
     
     testAll = False;
-    
+
+#    DBCreator(args.tokenChunkFileDir, args.outputCSVPath, maxNumSentences=2000);
+#    sys.exit()
     
     class TestSuite(unittest.TestCase):
                 

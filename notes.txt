@@ -47,7 +47,7 @@
       mkdir Resources/EnronCollectionProcessed/EnronDB
       ./make_database_from_emails.py -o \
                       Resources/EnronCollectionProcessed/EnronDB/enronDB.csv \
-		      Resources/EnronCollectionProcessed/EnronDB/enronTokenized
+		      Resources/EnronCollectionProcessed/EnronTokenized
  
      This run takes 8 hours on an 8-core/16GB machine. However, the
      data structure built in memory throws away two expensive lists
