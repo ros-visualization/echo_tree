@@ -63,7 +63,10 @@ class WordFollower(object):
         @rtype: sqlite3.cursor
         '''
         self.cursor = self.db.conn.cursor();
-        self.cursor.execute('SELECT follower,count from WordStats where word="%s";' % self.word);
+        # The *1 converts the followingCount value to an int. 
+        # Necessary so that the ordering isn't alpha. This even
+        # thought the followingCount is declared as int:
+        self.cursor.execute('SELECT follower,followingCount from EnronWords where word="%s" ORDER BY followingCount*1 desc;' % self.word);
         # Return iterator:
         return self.cursor;
     
@@ -123,8 +126,8 @@ class WordExplorer(object):
                     wordArr.append(followerWordPlusCount);
             # Sort array in place, using element 1 (the count) as
             # sort key. Want largest count (most frequent follower) 
-            # first:
-            wordArr.sort(key=itemgetter(1), reverse=True);
+            # first: (Commented b/c currently we have the SQL statement sort already):
+            #wordArr.sort(key=itemgetter(1), reverse=True);
             #print wordArr;
             frequencySortedWordArr = [];
             for wordPlusCount in wordArr:
@@ -133,7 +136,7 @@ class WordExplorer(object):
         return frequencySortedWordArr;
       
       
-    def makeWordTree(self, word, wordTree=None, maxDepth=3):
+    def makeWordTree(self, word, wordTree=None, maxDepth=3, maxBranch=5):
         '''
         Return a Python WordTree structure in which the
         followWordObjs are sorted by decreasing frequency. This
@@ -145,18 +148,25 @@ class WordExplorer(object):
         @param maxDepth: How deep the tree should grow, that is how far along a 
                          word-follows chain the recursion should proceed.
         @type maxDepth: int
+        @param maxBranch: max breadth of each branch. I.e. how many of a word's followWords are pursued.
+                          The followWords chosen are by frequency with which the followWord follows
+                          the respective word (content of parm word).
+        @type maxBranch: int
         @return: new EchoTree Python structure
         @rtype: string
         '''
         # Recursion bottomed out:
-        if maxDepth == 0:
+        if maxDepth <= 0:
             return wordTree;
         if wordTree is None:
             # Use OrderedDict so that conversions to JSON show the 'word' key first:
             wordTree = OrderedDict();
         wordTree['word'] = word;
         wordTree['followWordObjs'] = []
-        for followerWord in self.getSortedFollowers(word):
+        for i,followerWord in enumerate(self.getSortedFollowers(word)):
+            # Curtail the tree breadth, i.e. number of follow words we pursue:
+            if i >= maxBranch:
+                return wordTree;
             # Each member of the followWordOjbs array is its own tree:
             followerTree = OrderedDict();
             newSubtree = self.makeWordTree(followerWord, followerTree, maxDepth-1);
@@ -179,7 +189,8 @@ class WordExplorer(object):
 
 if __name__ == "__main__":
     
-    dbPath = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/testDb.db");
+    #dbPath = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/testDb.db");
+    dbPath = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/EnronCollectionProcessed/EnronDB/enronDB.db");
     
 #    db = WordDatabase(dbPath);
 #    with WordFollower(db, 'ant') as followers:
@@ -188,6 +199,11 @@ if __name__ == "__main__":
     
     explorer = WordExplorer(dbPath);
     
+    #print explorer.getSortedFollowers('my');
+    jsonTree = explorer.makeJSONTree(explorer.makeWordTree('my'));
+    print jsonTree;
+    exit();
+    
 #    print explorer.getSortedFollowers('ant');
 #    print explorer.getSortedFollowers('echo');
 #    # Cache works? (put breakpoint in getSortedFollowers try: statement to check):
@@ -195,6 +211,7 @@ if __name__ == "__main__":
             
 #    print explorer.makeWordTree('ant');
 #    print explorer.makeWordTree('echo');
+
     jsonTree = explorer.makeJSONTree(explorer.makeWordTree('echo'));
     print jsonTree;
     
