@@ -139,9 +139,10 @@
   cloned project.
 
 - Enron data:
-    o 531,422 messages
+    o 48,900 messages
     o 2.624GB of total length of email files
-    o enronDB has 7,332,416 entries (that's larger than the word
+    o csv file 174,465,277bytes == 174GB uncompressed (compressed: 4,6015,851)
+    o csv file has 7,890,661 rows (that's larger than the word
         count!)
     o Final DB:
        * 3,881,632 rows (not same as unique words!)
