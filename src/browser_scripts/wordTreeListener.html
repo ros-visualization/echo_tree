@@ -30,7 +30,7 @@
 // Dimentions and other core viz elements
 var m = [20, 120, 20, 120],
     w = 1000 - m[1] - m[3],
-    h = 800 - m[0] - m[2],
+    h = 600 - m[0] - m[2],
     i = 0,
     duration = 500,
     root;
@@ -55,9 +55,8 @@ if(typeof(WebSocket)!=="undefined") {
 
   // Create a WebSocket connected back to the EchoTree server 
   // where this script came from:
-  //var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
   //var ws = new WebSocket("ws://duo:5001/subscribe_to_echo_trees");
-  var ws = new WebSocket("ws://localhost:5001/subscribe_to_echo_trees");
+  var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
 
   ws.onopen = function () {
   };
@@ -67,7 +66,14 @@ if(typeof(WebSocket)!=="undefined") {
   };
 
   ws.onmessage = function (event) {
-    root = event.data;
+    //root = eval('(' + event.data + ')');
+    try {
+       if event.data.length == 0
+          return;
+       root = eval(event.data);
+    } catch(err) {
+       return;
+    }
     root.x0 = h / 2;
     root.y0 = 0;
     
@@ -187,14 +193,16 @@ function update(source) {
 
 // Toggle children on node click.
 function toggle(d) {
-    if (d.children) {
-        d.followWordObjs = d.children;
-        d.children = null;
-    } else {
-        d.children = d.followWordObjs;
-        d.followWordObjs = null;
-    }
-    update(d);
+  
+  ws.send(d.word);			// Send data back to server;
+  if (d.children) {
+      d.followWordObjs = d.children;
+      d.children = null;
+  } else {
+      d.children = d.followWordObjs;
+      d.followWordObjs = null;
+  }
+  update(d);
 }
     
     </script>
