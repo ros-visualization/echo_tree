@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import json;
+from collections import deque;
+from collections import OrderedDict;
 
 from echo_tree import WORD_TREE_BREADTH;
 from echo_tree import WORD_TREE_DEPTH;
@@ -10,16 +12,30 @@ class Evaluator(object):
     def __init__(self):
         pass
     
+    def extractWordSet(self, jsonEchoTreeStr):
+        pythonEchoTree = json.loads(jsonEchoTreeStr);
+        flatTree  = self.extractWordSeqsHelper(pythonEchoTree);
+        flatList  = flatTree.split();
+        rootWord = flatList[0];
+        flatSet = set(flatList[1:]);
+        return (rootWord, flatSet);
+    
     def extractWordSeqs(self, jsonEchoTreeStr):
         pythonEchoTree = json.loads(jsonEchoTreeStr);
-        sentences = [];
-        rootWord = pythonEchoTree['word'];
-        for subtreeDict in pythonEchoTree['followWordObjs']:
-            # A new sentence:
-            currSentence = rootWord + u' ';
-            currSentence += self.extractWordSeqsHelper(subtreeDict);
-            sentences.append(currSentence);
-        return sentences;            
+        flatTree  = self.extractWordSeqsHelper(pythonEchoTree);
+        flatQueue = deque(flatTree.split());
+        # Number of words: breadth ** (depth-1) + 1
+        numSibPops = WORD_TREE_BREADTH ** (WORD_TREE_DEPTH - 2);
+        # Root word first:
+        resDictQueue = deque([flatQueue[0]]);
+        for dummy in range(numSibPops):
+            sibs = deque([]);
+            parentDict = OrderedDict();
+            resDictQueue.append(parentDict);
+            for dummy in range(WORD_TREE_BREADTH):
+                sibs.append(flatQueue.pop());
+            parentDict[flatQueue.pop()] = sibs;
+        return resDictQueue;
     
     def extractWordSeqsHelper(self, pythonEchoTreeDict):
         '''
@@ -107,9 +123,18 @@ if __name__ == '__main__':
     
     evaluator = Evaluator();
     sentences = evaluator.extractWordSeqs(testJson);
-    print str(sentences);
-     
-        
+    # Root word:
+    print sentences.popleft();
+    indents=[1,2,3,4];
+    for i,wordDict in enumerate(reversed(sentences)):
+        indent = indents[0];
+        parentWord =  wordDict.keys()[0];
+        print '\t'*indent + parentWord;
+        for word in reversed(wordDict[parentWord]):
+            indent = indents[1];
+            print '\t'*indent + word;
             
+    sentences = evaluator.extractWordSeqs(testJson);
+    print str(evaluator.extractWordSet(testJson));        
         
         
