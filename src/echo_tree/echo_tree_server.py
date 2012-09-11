@@ -113,11 +113,13 @@ class EchoTreeService(WebSocketHandler):
     
     def on_message(self, message):
         '''
-        We do not currently expect info flow from browser to this server.
+        Connected browser requests a new word:
         @param message: message arriving from the browser
         @type message: string
         '''
-        EchoTreeService.log(message.body);
+        newRootWord = message.encode('utf-8');
+        #******EchoTreeService.log("New root word from connected browser: '%s'." % newRootWord);
+        #******NewEchoTreeSubmissionService.triggerTreeComputationAndDistrib(newRootWord);
     
     def on_close(self):
         '''
@@ -193,8 +195,9 @@ class EchoTreeService(WebSocketHandler):
     
 class NewEchoTreeSubmissionService(HTTPServer):
     '''
-    Service for submitting a new JSON encoded EchoTree.
-    Uses WebSocket to receive new JSON encoded EchoTrees.
+    Service for submitting a new root word. Service will
+    compute a new tree, and cause it to be distributed to
+    all connected browsers.
     '''
     
 #    def __init__(self, requestHandler):
@@ -212,10 +215,16 @@ class NewEchoTreeSubmissionService(HTTPServer):
         @type request: HTTPRequest.HTTPRequest
         '''
         
-        EchoTreeService.log("Receiving a new root word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip));
-        NewEchoTreeSubmissionService.TreeComputer.rootWord = request.body;
+        EchoTreeService.log("New root via HTTP; word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip));    
+        NewEchoTreeSubmissionService.triggerTreeComputationAndDistrib(request.body);
+
+    @staticmethod
+    def triggerTreeComputationAndDistrib(newRootWord):
+        if newRootWord == NewEchoTreeSubmissionService.TreeComputer.rootWord:
+            return;
+        NewEchoTreeSubmissionService.TreeComputer.rootWord = newRootWord;
         NewEchoTreeSubmissionService.TreeComputer.newWordEvent.set();
-        
+    
     def on_close(self):
         pass
     
@@ -321,7 +330,7 @@ class SocketServerThreadStarter(Thread):
                 EchoTreeService.log("Starting EchoTree new tree submissions server %d: accepts word trees submitted from connecting clients." % self.port);
                 http_server = NewEchoTreeSubmissionService(NewEchoTreeSubmissionService.handle_request);
                 http_server.listen(self.port);
-                self.ioLoop = IOLoop.instance();
+                self.ioLoop = IOLoop();
                 self.ioLoop.start();
                 self.ioLoop.close(all_fds=True);
                 return;
@@ -329,7 +338,7 @@ class SocketServerThreadStarter(Thread):
                 EchoTreeService.log("Starting EchoTree script server %d: Returns one script that listens to the new-tree events in the browser." % self.port);
                 http_server = EchoTreeScriptRequestHandler(EchoTreeScriptRequestHandler.handle_request);
                 http_server.listen(self.port);
-                self.ioLoop = IOLoop.instance(); 
+                self.ioLoop = IOLoop();
                 self.ioLoop.start();
                 self.ioLoop.close(all_fds=True);
                 return;

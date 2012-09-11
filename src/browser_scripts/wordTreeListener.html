@@ -66,11 +66,10 @@ if(typeof(WebSocket)!=="undefined") {
   };
 
   ws.onmessage = function (event) {
-    //root = eval('(' + event.data + ')');
     try {
-       if event.data.length == 0
+       if (event.data.length == 0)
           return;
-       root = eval(event.data);
+       root = eval("(" + event.data + ")");
     } catch(err) {
        return;
     }
