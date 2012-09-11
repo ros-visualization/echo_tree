@@ -5,12 +5,13 @@ import os;
 import getopt;
 
 from python_qt_binding import QtBindingHelper;
-from QtGui import QApplication, QMainWindow, QWidget, QErrorMessage, QMessageBox;
+from PyQt4.QtGui import QApplication, QMainWindow, QWidget, QErrorMessage, QMessageBox;
 
 from root_word_pusher import RootWordPusher;
 from echo_tree_server import ECHO_TREE_NEW_ROOT_PORT;
 
 GUI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "QtCreatorFiles/echo_tree_push_tester/wordpushergui.ui");
+
 
 # ---------------------------------------------  Class WordPusherGui ---------------------
 
@@ -27,9 +28,9 @@ class DialogService(QWidget):
         # Used by self.showErrorMsgByErrorCode(<errorCode>), 
         # or self.showErrorMsg(<string>). Returns a
         # QErrorMessage without parent, but with QWindowFlags set
-	    # properly to be a dialog popup box:
+        # properly to be a dialog popup box:
         self.errorMsgPopup = QErrorMessage.qtHandler();
-       	# Re-parent the popup, retaining the window flags set
+        # Re-parent the popup, retaining the window flags set
         # by the qtHandler:
         self.errorMsgPopup.setParent(parent, self.errorMsgPopup.windowFlags());
         #self.errorMsgPopup.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     if thePort is not None:
         wordPusher = WordPusherGui(serverAddr, port=thePort);
     else:
-        wordPusher = WordPusherGui(serverAddr);
+        wordPusher = WordPusherGui(serverAddr, port=ECHO_TREE_NEW_ROOT_PORT);
     app.exec_();
     sys.exit();
     

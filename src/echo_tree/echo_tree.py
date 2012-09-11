@@ -16,10 +16,13 @@ database of co-occurrence data in a collection. Provides both
 Python and JSON results.
 '''
 
+WORD_TREE_BREADTH = 5;
+WORD_TREE_DEPTH   = 3;
+
 # ------------------------------- class Word Database ---------------------
 class WordDatabase(object):
     '''
-    Service class to wrap an underlying SQLite database file.
+    Service class to wrap an underlying SQLite database file.socket
     '''
     
     def __init__(self, SQLiteDbPath):
@@ -66,7 +69,11 @@ class WordFollower(object):
         # The *1 converts the followingCount value to an int. 
         # Necessary so that the ordering isn't alpha. This even
         # thought the followingCount is declared as int:
-        self.cursor.execute('SELECT follower,followingCount from EnronWords where word="%s" ORDER BY followingCount*1 desc;' % self.word);
+        try:
+            self.cursor.execute('SELECT follower,followingCount from EnronWords where word="%s" ORDER BY followingCount*1 desc;' % self.word);
+        except sqlite3.OperationalError as e:
+            raise ValueError("SELECT statement failed for word '%s' in databse '%s': %s" % (self.word, self.db.dbPath, `e`));
+            
         # Return iterator:
         return self.cursor;
     
@@ -136,7 +143,7 @@ class WordExplorer(object):
         return frequencySortedWordArr;
       
       
-    def makeWordTree(self, word, wordTree=None, maxDepth=3, maxBranch=5):
+    def makeWordTree(self, word, wordTree=None, maxDepth=WORD_TREE_DEPTH, maxBranch=WORD_TREE_BREADTH):
         '''
         Return a Python WordTree structure in which the
         followWordObjs are sorted by decreasing frequency. This
@@ -200,7 +207,7 @@ if __name__ == "__main__":
     explorer = WordExplorer(dbPath);
     
     #print explorer.getSortedFollowers('my');
-    jsonTree = explorer.makeJSONTree(explorer.makeWordTree('my'));
+    jsonTree = explorer.makeJSONTree(explorer.makeWordTree('reliability'));
     print jsonTree;
     exit();
     

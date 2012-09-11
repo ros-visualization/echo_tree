@@ -17,9 +17,9 @@ class RootWordPusher(object):
         '''
         Attempts to connect to the Web server defined by the
         imported HOST and ECHO_TREE_NEW_ROOT_PORT. If successful,
-        pushes the given JSON formatted tree to that server. The server will in turn
-        push the new tree to any interested clients. It is not an
-        error if the connection attempt to the Web server fails, 
+        pushes the given new root word to that server. The server will in turn
+        create a new JSON tree, and make it available to any interested clients. 
+        It is not an error if the connection attempt to the Web server fails, 
         
         @param rootWord: new root word from which an EchoTree will be constructed.
         @type rootWord: string

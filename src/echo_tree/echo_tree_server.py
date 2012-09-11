@@ -27,7 +27,8 @@ ECHO_TREE_SCRIPT_SERVER_PORT = 5000;
 ECHO_TREE_GET_PORT = 5001;
 ECHO_TREE_NEW_ROOT_PORT = 5002;
 
-DBPATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/testDb.db");
+#DBPATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/testDb.db");
+DBPATH = os.path.join(os.path.realpath(os.path.dirname(__file__)), "Resources/EnronCollectionProcessed/EnronDB/enronDB.db");
 
 SCRIPT_REQUEST_URI_PATH = r"/request_echo_tree_script";
 NEW_TREE_SUBMISSION_URI_PATH = r"/submit_new_echo_tree";
@@ -39,7 +40,7 @@ TREE_EVENT_LISTEN_SCRIPT_NAME = "wordTreeListener.html";
 
 # -----------------------------------------  Top Level Service Provider Classes --------------------
 
-class EchoTreeService(tornado.websocket.WebSocketHandler):
+class EchoTreeService(WebSocketHandler):
     '''
     Handles pushing new EchoTrees to browsers who display them.
     Each instance handles one browser via a long-standing WebSocket
@@ -82,7 +83,15 @@ class EchoTreeService(tornado.websocket.WebSocketHandler):
         # Go wait for new-tree updates:
         EchoTreeService.NewEchoTreeWaitThread(self).start();
     
-    def open(self):
+#    def subscribeToNewTrees(self, handler):
+#        with EchoTreeService.activeHandlersChangeLock:
+#            EchoTreeService.activeHandlers.append(handler);
+    
+    def open(self): #@ReservedAssignment
+        '''
+        Called by WebSocket/tornado when a client connects. Method must
+        be named 'open'
+        '''
         with EchoTreeService.currentEchoTreeLock:
             # Deliver the current tree to the subscribing browser:
             try:
@@ -143,7 +152,7 @@ class EchoTreeService(tornado.websocket.WebSocketHandler):
                     # Deliver the new tree to the browser:
                     try:
                         self.handlerObj.write_message(EchoTreeService.currentEchoTree);
-                    except Exception as e:
+                    except Exception:
                         print "Error during send of new EchoTree to %s (%s)" % (self.handlerObj.request.host, self.handlerObj.request.remote_ip);
                 self.handlerObj.newEchoTreeEvent.clear();
     
@@ -165,13 +174,13 @@ class NewEchoTreeSubmissionService(HTTPServer):
         '''
         Receives a new root word, from which it asks the WordExplorer to make
         a JSON word tree. Stores that new tree in EchoTreeService.currentEchoTree.
-        Then raises NewEchoTreeSignal so that all EchoTree handlers' on_new_echo_tree()
-        method gets called.
+        Then sets the newWordEvent so that everyone waiting for that event
+        gets called.
         @param request: incoming new EchoTree 
         @type request: HTTPRequest.HTTPRequest
         '''
         
-        print "Receiving a new root word from %s (%s)..." % (request.host, request.remote_ip);
+        print "Receiving a new root word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip);
         NewEchoTreeSubmissionService.TreeComputer.rootWord = request.body;
         NewEchoTreeSubmissionService.TreeComputer.newWordEvent.set();
         
@@ -192,6 +201,7 @@ class NewEchoTreeSubmissionService(HTTPServer):
             self.wordExplorer = WordExplorer(DBPATH);
             while 1:
                 NewEchoTreeSubmissionService.TreeComputer.newWordEvent.wait();
+                # ***** TODO: should check the cache first:
                 newJSONEchoTreeStr = self.wordExplorer.makeJSONTree(self.wordExplorer.makeWordTree(NewEchoTreeSubmissionService.TreeComputer.rootWord));
                 
                 # Store the new tree in the appropriate EchoTreeService class variable:

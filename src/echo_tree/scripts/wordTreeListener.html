@@ -1,40 +1,202 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <script type="text/javascript">
-
-      // Check for browser support:
-      if(typeof(WebSocket)!=="undefined") {
-
-      	// Create a WebSocket connected back to the EchoTree server 
-        // where this script came from:
-        //var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
-        var ws = new WebSocket("ws://duo:5001/subscribe_to_echo_trees");
-
-        ws.onopen = function () {
-        };
-
-        ws.onerror = function () {
-          alert("Error occurred. (Helpful message, isn't it?");
-        };
-
-        ws.onmessage = function (event) {
-           //alert(event.data);
-           document.getElementById("newTree").innerHTML=event.data;
-        };
-      }
-
-      else {
-        // WebSockts not supported in this browser:
-      	document.getElementById("newTree").innerHTML="Whoops! Your browser doesn't support WebSockets.";
-      }
-
-    </script>
+    <script type="text/javascript" src="http://d3js.org/d3.v2.min.js?2.10.0"></script>
+    <style type="text/css">        
+    .node circle {
+	cursor: pointer;
+	fill: #fff;
+	stroke: steelblue;
+	stroke-width: 2px;
+    }
+    
+    .node text {
+	font: 16px sans-serif;
+    }
+		
+    path.link {
+	fill:none;
+	stroke: #ccc;
+	stroke-width: 2px;
+    }           
+    </style>
   </head>
   <body>
     Starting to listen for word trees...
-  <div id="newTree">
-    Tree will appear here.
-  </div>
+    <div id="echotree">
+    </div>
+    <script type="text/javascript">
+
+// Dimentions and other core viz elements
+var m = [20, 120, 20, 120],
+    w = 1000 - m[1] - m[3],
+    h = 800 - m[0] - m[2],
+    i = 0,
+    duration = 500,
+    root;
+    
+// Tree Layout
+var tree = d3.layout.tree()
+  .size([h,w]);
+
+// Function for computing curved edges
+var diagonal = d3.svg.diagonal()
+  .projection(function(d) { return[d.y, d.x]; });
+  
+// Main Canvas
+var vis = d3.select("#echotree").append('svg')
+    .attr("width", w + m[1] + m[3])
+    .attr("height", h + m[0] + m[2])
+  .append('g')
+    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+    
+// Check for browser support:
+if(typeof(WebSocket)!=="undefined") {
+
+  // Create a WebSocket connected back to the EchoTree server 
+  // where this script came from:
+  //var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
+  //var ws = new WebSocket("ws://duo:5001/subscribe_to_echo_trees");
+  var ws = new WebSocket("ws://localhost:5001/subscribe_to_echo_trees");
+
+  ws.onopen = function () {
+  };
+
+  ws.onerror = function () {
+    alert("Error occurred. (Helpful message, isn't it?");
+  };
+
+  ws.onmessage = function (event) {
+    root = event.data;
+    root.x0 = h / 2;
+    root.y0 = 0;
+    
+    // As default, start with tree collapsed.
+    // Obviously can change this in the future.
+    function collapse(d) {
+      if (d.followWordObjs) {
+	if (d.followWordObjs.length > 0) {
+	  d.followWordObjs.forEach(collapse);
+	  d.children = null;
+	}
+      }
+    }
+    
+    root.followWordObjs.forEach(collapse);
+    update(root);
+  };
+} else {
+  // WebSockets not supported in this browser:
+  document.getElementById("newTree").innerHTML="Whoops! Your browser doesn't support WebSockets.";
+}
+
+function update(source) {
+  
+  // Compute new tree layout.
+  var nodes = tree.nodes(root).reverse();
+  
+  // Compute the depth for each node.
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  
+  // Update the nodes.
+  var node = vis.selectAll("g.node")
+    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+    
+  // New nodes enter at position of parent.
+  var nodeEnter = node.enter().append('g')
+    .attr('class', 'node')
+    .attr('transform', function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+    .on("click", toggle);
+    
+  // Node circles start tiny and gray.
+  nodeEnter.append("circle")
+    .attr("r", 1e-6)
+    .style("fill", function(d) { return d.children ? "lightsteelblue": "#fff"; });
+    
+  // Node text starts invisible.
+  nodeEnter.append("text")
+      .attr("x", function(d) { return d.children || d.followWordObjs ? -10 : 10; })
+      .attr("dy", ".35em")
+      .attr("text-anchor", function(d) { return d.chilredn || d.followWordObjs ? "end" : "start";})
+      .text(function(d) { return d.word; })
+      .style("fill-opacity", 1e-6)
+      
+  // Transition nodes to new position.
+  var nodeUpdate = node.transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+  
+  // Update node circle
+  nodeUpdate.select("circle")
+      .attr("r", 6)
+      .style("fill", function(d) { return d.followWordObjs ? "lightsteelblue" : "#fff"; });
+      
+  // Update node label text
+  nodeUpdate.select("text")
+      .style("fill-opacity", 1);
+
+  // Nodes exit at parent's new position.
+  var nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+      .remove();
+  
+  // Shrink nodes on exit.
+  nodeExit.select("circle")
+      .attr("r", 1e-6);
+  
+  // Fade out node label at exit.
+  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+      
+  // Update links
+  var link = vis.selectAll("path.link")
+      .data(tree.links(nodes), function(d) { return d.target.id; });
+  
+  // Enter new links at parent's previous position.
+  link.enter().insert("path", "g")
+      .attr("class", "link")
+      .attr("d", function(d) {
+	  var o = {x: source.x0, y: source.y0};
+	  return diagonal({source: o, target: o});
+      })
+    .transition()
+      .duration(duration)
+      .attr("d", diagonal);
+  
+  // Transition links to new position.
+  link.transition()
+      .duration(duration)
+      .attr("d", diagonal);
+  
+  // Exit nodes via parent's new position.
+  link.exit().transition()
+      .duration(duration)
+      .attr("d", function(d) {
+	  var o = {x: source.x, y: source.y};
+	  return diagonal({source: o, target: o});
+      })
+      .remove();
+  
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+      d.x0 = d.x;
+      d.y0 + d.y;
+  });
+}
+
+// Toggle children on node click.
+function toggle(d) {
+    if (d.children) {
+        d.followWordObjs = d.children;
+        d.children = null;
+    } else {
+        d.children = d.followWordObjs;
+        d.followWordObjs = null;
+    }
+    update(d);
+}
+    
+    </script>
   </body>
 </html>

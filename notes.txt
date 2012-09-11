@@ -165,22 +165,207 @@ STOPWORDS =  ['a','able','about','across','after','all','almost','also','am','am
               'six', 'seven', 'eight', 'nine', 'ten', 'enron', 'http'];
 
 
-More stopword candidates:
-     with, in, or, from, 
+- Script debugging:
 
-.mode csv
-.import enronDB.csv EnronWords
+      * root.followWordObjs is undefined
+          Line 85
+             "{"word": "reliability", "followWordObjs": [{"word": "new", "followWordObjs": [{"word": "power", "followWordObjs": []}, {"word": "generation", "followWordObjs": []}, {"word": "business", "followWordObjs": []}, {"word": "product", "followWordObjs": []}, {"word": "company", "followWordObjs": []}]}, {"word": "issues", "followWordObjs": [{"word": "related", "followWordObjs": []}, {"word": "need", "followWordObjs": []}, {"word": "raised", "followWordObjs": []}, {"word": "such", "followWordObjs": []}, {"word": "addressed", "followWordObjs": []}]}, {"word": "legislation", "followWordObjs": [{"word": "passed", "followWordObjs": []}, {"word": "allow", "followWordObjs": []}, {"word": "introduced", "followWordObjs": []}, {"word": "require", "followWordObjs": []}, {"word": "provide", "followWordObjs": []}]}, {"word": "standards", "followWordObjs": [{"word": "conduct", "followWordObjs": []}, {"word": "set", "followWordObjs": []}, {"word": "needed", "followWordObjs": []}, {"word": "facilitate", "followWordObjs": []}, {"word": "required", "followWordObjs": []}]}, {"word": "problems", "followWordObjs": [{"word": "please", "followWordObjs": []}, {"word": "California", "followWordObjs": []}, {"word": "accessing", "followWordObjs": []}, {"word": "arise", "followWordObjs": []}, {"word": "occur", "followWordObjs": []}]}]}"
 
 
+
+        Stacktrace:
+	this
+	 	WebSocket { url=
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 , readyState=
+	 1
+	 , bufferedAmount=
+	 0
+	 , more...}
+	 	
+	 CLOSED
+	 	
+	 3
+	 	
+	 CLOSING
+	 	
+	 2
+	 	
+	 CONNECTING
+	 	
+	 0
+	 	
+	 OPEN
+	 	
+	 1
+	 	
+	 binaryType
+	 	
+	 "blob"
+	 	
+	 bufferedAmount
+	 	
+	 0
+	 	
+	 extensions
+	 	
+	 ""
+	 	
+	 onclose
+	 	
+	 null
+	 	
+	 onopen
+	 	[xpconnect wrapped nsIDOMEventListener] { QueryInterface=QueryInterface(), handleEvent=handleEvent()}
+	 	
+	 protocol
+	 	
+	 ""
+	 	
+	 readyState
+	 	
+	 1
+	 	
+	 url
+	 	
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 	
+	 constructor
+	 	[object WebSocket]
+	 	
+	 addEventListener
+	 	addEventListener()
+	 	
+	 close
+	 	close()
+	 	
+	 dispatchEvent
+	 	dispatchEvent()
+	 	
+	 removeEventListener
+	 	removeEventListener()
+	 	
+	 send
+	 	send()
+	 	
+	 __proto__
+	 	[xpconnect wrapped native prototype] { CONNECTING=
+	 0
+	 , OPEN=
+	 1
+	 , CLOSING=
+	 2
+	 , more...}
+	 	
+	 arguments
+	 	
+	 [message ]
+	 	
+	 event
+	 	message
+	 	
+	 NONE
+	 	
+	 0
+	 	
+	 data
+	 	
+	 "{"word": "reliability", "followWordObjs": [{"word": "new", "followWordObjs": [{"word": "power", "followWordObjs": []}, {"word": "generation", "followWordObjs": []}, {"word": "business", "followWordObjs": []}, {"word": "product", "followWordObjs": []}, {"word": "company", "followWordObjs": []}]}, {"word": "issues", "followWordObjs": [{"word": "related", "followWordObjs": []}, {"word": "need", "followWordObjs": []}, {"word": "raised", "followWordObjs": []}, {"word": "such", "followWordObjs": []}, {"word": "addressed", "followWordObjs": []}]}, {"word": "legislation", "followWordObjs": [{"word": "passed", "followWordObjs": []}, {"word": "allow", "followWordObjs": []}, {"word": "introduced", "followWordObjs": []}, {"word": "require", "followWordObjs": []}, {"word": "provide", "followWordObjs": []}]}, {"word": "standards", "followWordObjs": [{"word": "conduct", "followWordObjs": []}, {"word": "set", "followWordObjs": []}, {"word": "needed", "followWordObjs": []}, {"word": "facilitate", "followWordObjs": []}, {"word": "required", "followWordObjs": []}]}, {"word": "problems", "followWordObjs": [{"word": "please", "followWordObjs": []}, {"word": "California", "followWordObjs": []}, {"word": "accessing", "followWordObjs": []}, {"word": "arise", "followWordObjs": []}, {"word": "occur", "followWordObjs": []}]}]}"
+	 	
+	 defaultPrevented
+	 false
+	 lastEventId
+	 ""
+	 origin
+	 "ws://localhost:5001"
+	 source
+	 null
+	 initMessageEvent
+	 	initMessageEvent()
+	 stopImmediatePropagation
+	 	stopImmediatePropagation()
+	 bubbles
+	 false
+	 cancelable
+	 false
+	 constructor
+	 	MessageEvent {}
+	 currentTarget
+	 	WebSocket { url=
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 , readyState=
+	 1
+	 , bufferedAmount=
+	 0
+	 , more...}
+	 eventPhase
+	 2
+	 explicitOriginalTarget
+	 	WebSocket { url=
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 , readyState=
+	 1
+	 , bufferedAmount=
+	 0
+	 , more...}
+	 	
+	 isTrusted
+	 	
+	 true
+	 	
+	 originalTarget
+	 	WebSocket { url=
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 , readyState=
+	 1
+	 , bufferedAmount=
+	 0
+	 , more...}
+	 	
+	 target
+	 	WebSocket { url=
+	 "ws://localhost:5001/subscribe_to_echo_trees"
+	 , readyState=
+	 1
+	 , bufferedAmount=
+	 0
+	 , more...}
+	 	
+	 timeStamp
+	 	
+	 1347313343740129
+	 	
+	 type
+	 	
+	 "message"
+	 	
+	 collapse
+	 	collapse(d)
+	 	
+	 toString
+	 	function()
+	 	
+	 Window
+	 	Window localhost:5000
+  *  TypeError: f._tree is undefined
+      [Break On This Error] 	
+          ...ction(t){return arguments.length?(b=t,y=t.copy(),e):b},e.y=function(t){return ar...
+     Stacktrace at the break: 
+	       mouse()d3.v2....?2.10.0 (line 3)
+	       e =  "{"word": "reliability",...ollowWordObjs": []}]}]}"
+	       i = undefined
+	       e()d3.v2....?2.10.0 (line 1)
+	       t = "{"word": "reliability",...ollowWordObjs": []}]}]}"
+	       update()localhost:5000 (line 100)
+	       source = "{"word": "reliability",...ollowWordObjs": []}]}]}"
+	       onmessage()localhost:5000 (line 90)
+	       event = message 
+	       d3.v2.min.js?2.10.0()d3.v2....?2.10.0 (line 1)  
 
 ----------------------------------
-
-
 - Using the Stanford NLP sentence segmenter and tokenizer:
      java edu.stanford.nlp.process.DocumentPreprocessor -file myDoc.txt > oneTokenizedSentencePerLine.txt
         -file for Text file, -html for HTML, etc.
-
-
 Result of stringifying in JSON. This is what Python server
 must generate and send over the WebSocket wire:
 {
@@ -321,7 +506,6 @@ must generate and send over the WebSocket wire:
     ]
 }
 ----------------------
-
 {"word": "echo", 
  "followWordObjs": [
 	    		{"word": "chamber", 

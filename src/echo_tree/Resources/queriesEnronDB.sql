@@ -1,9 +1,16 @@
 select word,follower,followingCount from EnronWords where word="my" order by followingCount*1 desc;
 select word,follower,followingCount from EnronWords where word="reliability" order by followingCount*1 desc;
 select word,follower,followingCount from EnronWords where word="speed" order by followingCount*1 desc;
+select word,follower,followingCount from EnronWords where word="introduced" order by followingCount*1 desc;
+
+select word,follower,followingCount from EnronWords where word="reliability" order by followingCount*1 desc;
+select word,follower,followingCount from EnronWords where word="new" order by followingCount*1 desc;
+select word,follower,followingCount from EnronWords where word="issues" order by followingCount*1 desc;
+select word,follower,followingCount from EnronWords where word="legislation" order by followingCount*1 desc;
+select word,follower,followingCount from EnronWords where word="problems" order by followingCount*1 desc;
 
 select word from EnronWords where word="reliability";
-select word from EnronWords where word="my";
+select word from EnronWords where word="introduced";
 select word,follower,followingCount from EnronWords where word="not";
 
 
