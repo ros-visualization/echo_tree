@@ -273,7 +273,7 @@ class EchoTreeScriptRequestHandler(HTTPServer):
         '''
         # Path to the HTML page we serve. Should probably just load that once, but
         # this request is not frequent. 
-        scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "scripts/" + TREE_EVENT_LISTEN_SCRIPT_NAME);
+        scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "browser_scripts/" + TREE_EVENT_LISTEN_SCRIPT_NAME);
         # Create the response and the HTML page string:
         reply =  "HTTP/1.1 200 OK\r\n" +\
                  "Content-type, text/html\r\n" +\
