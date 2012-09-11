@@ -11,8 +11,11 @@ For ports, see constants below.
 '''
 
 import os;
+import sys;
 import time;
 import socket;
+import argparse;
+import datetime;
 from threading import Event, Lock, Thread;
 
 import tornado;
@@ -57,6 +60,14 @@ class EchoTreeService(WebSocketHandler):
     # Lock for changing the current EchoTree:
     currentEchoTreeLock = Lock();
     
+    # Log FD for logging. If None, calls to log() are ignored.
+    # Else log to this FD (allowed to be sys.stdout for console:
+    logFD = None;
+    # If true, log to console, independently of logFD. If logFD is
+    # provided (and not just sys.stdout), then logging occurs to
+    # that FD *and* to the console. Else just to the concole:
+    logToConsole = False;
+    
     def __init__(self, application, request, **kwargs):
         '''
         Invoked when browser accesses this server via ws://...
@@ -70,7 +81,7 @@ class EchoTreeService(WebSocketHandler):
         '''
         super(EchoTreeService, self).__init__(application, request, **kwargs);
         self.request = request;
-        print "Browser at %s (%s) subscribing to EchoTrees." % (request.host, request.remote_ip);
+        EchoTreeService.log("Browser at %s (%s) subscribing to EchoTrees." % (request.host, request.remote_ip));
         
         # Register this handler instance as wishing to hear
         # about new incoming EchoTrees:
@@ -97,7 +108,7 @@ class EchoTreeService(WebSocketHandler):
             try:
                 self.write_message(EchoTreeService.currentEchoTree);
             except Exception as e:
-                print "Error during send of current EchoTree to %s (%s) during initial subscription: %s" % (self.request.host, self.request.remote_ip, `e`);
+                EchoTreeService.log("Error during send of current EchoTree to %s (%s) during initial subscription: %s" % (self.request.host, self.request.remote_ip, `e`));
         
     
     def on_message(self, message):
@@ -118,7 +129,26 @@ class EchoTreeService(WebSocketHandler):
                 EchoTreeService.activeHandlers.remove(self);
             except:
                 pass
-        print "Browser at %s (%s) now disconnected." % (self.request.host, self.request.remote_ip);
+        EchoTreeService.log("Browser at %s (%s) now disconnected." % (self.request.host, self.request.remote_ip));
+
+    @staticmethod
+    def log(theStr, addTimestamp=True):
+        if EchoTreeService.logFD is None and not EchoTreeService.logToConsole:
+            return;
+        if addTimestamp:
+            timestamp = str(datetime.datetime.now());
+            # Write timestamp to log file if appropriate:
+            if EchoTreeService.logFD is not None:
+                EchoTreeService.logFD.write(timestamp + ": ");
+            # Write timestamp to console, if appropriate:
+            if EchoTreeService.logToConsole and EchoTreeService.logFD != sys.stdout:
+                sys.stdout.write(timestamp + ': ');
+        if EchoTreeService.logFD is not None:
+            EchoTreeService.logFD.write(theStr + '\n');
+            EchoTreeService.logFD.flush();
+        if EchoTreeService.logToConsole and EchoTreeService.logFD != sys.stdout:
+            sys.stdout.write(theStr + '\n');
+        
     
     @staticmethod
     def notifyInterestedParties():
@@ -153,8 +183,10 @@ class EchoTreeService(WebSocketHandler):
                     try:
                         self.handlerObj.write_message(EchoTreeService.currentEchoTree);
                     except Exception:
-                        print "Error during send of new EchoTree to %s (%s)" % (self.handlerObj.request.host, self.handlerObj.request.remote_ip);
+                        EchoTreeService.log("Error during send of new EchoTree to %s (%s)" % (self.handlerObj.request.host, self.handlerObj.request.remote_ip));
                 self.handlerObj.newEchoTreeEvent.clear();
+                with EchoTreeService.currentEchoTreeLock:
+                    EchoTreeService.log(EchoTreeService.currentEchoTree);
     
 # -----------------------------------------  Class for submission of new EchoTrees ---------------    
     
@@ -180,7 +212,7 @@ class NewEchoTreeSubmissionService(HTTPServer):
         @type request: HTTPRequest.HTTPRequest
         '''
         
-        print "Receiving a new root word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip);
+        EchoTreeService.log("Receiving a new root word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip));
         NewEchoTreeSubmissionService.TreeComputer.rootWord = request.body;
         NewEchoTreeSubmissionService.TreeComputer.newWordEvent.set();
         
@@ -192,16 +224,22 @@ class NewEchoTreeSubmissionService(HTTPServer):
         
         rootWord = None;
         newWordEvent = Event();
+        keepRunning = True;
+        singletonRunning = False;
         
-#        def __init__(self):
-#            super(NewEchoTreeSubmissionService.TreeComputer, self).__init__();
-            
+        def __init__(self):
+            super(NewEchoTreeSubmissionService.TreeComputer, self).__init__();
+            if NewEchoTreeSubmissionService.TreeComputer.singletonRunning:
+                raise RuntimeError("Only one TreeComputer instance may run per process.");
+            NewEchoTreeSubmissionService.TreeComputer.singletonRunning = True;
+        
+        def stop(self):
+            NewEchoTreeSubmissionService.TreeComputer.keepRunning = False;
         
         def run(self):
             self.wordExplorer = WordExplorer(DBPATH);
-            while 1:
+            while NewEchoTreeSubmissionService.TreeComputer.keepRunning:
                 NewEchoTreeSubmissionService.TreeComputer.newWordEvent.wait();
-                # ***** TODO: should check the cache first:
                 newJSONEchoTreeStr = self.wordExplorer.makeJSONTree(self.wordExplorer.makeWordTree(NewEchoTreeSubmissionService.TreeComputer.rootWord));
                 
                 # Store the new tree in the appropriate EchoTreeService class variable:
@@ -212,6 +250,8 @@ class NewEchoTreeSubmissionService(HTTPServer):
                 # jsonTree has arrived, and they should push it to their clients:
                 EchoTreeService.notifyInterestedParties();
                 NewEchoTreeSubmissionService.TreeComputer.newWordEvent.clear();
+                EchoTreeService.log(NewEchoTreeSubmissionService.TreeComputer.rootWord);
+                EchoTreeService.log(newJSONEchoTreeStr);
         
 # --------------------  Request Handler Class for browsers requesting the JavaScript that knows to open an EchoTreeService connection ---------------
 class EchoTreeScriptRequestHandler(HTTPServer):
@@ -263,32 +303,36 @@ class SocketServerThreadStarter(Thread):
         @type port: int
         '''
         super(SocketServerThreadStarter, self).__init__();
-        self.socketServerClassName = socketServerClassName
-        self.port = port
-        
-        
+        self.socketServerClassName = socketServerClassName;
+        self.port = port;
+        self.ioLoop = None;
+
+    def stop(self):
+        self.ioLoop.stop();
+       
     def run(self):
         '''
         Use the service name to instantiate the proper service, passing in the
         proper helper class.
         '''
+        super(SocketServerThreadStarter, self).run();
         try:
-            if self.socketServerClassName == 'EchoTreeService':
-                # Not used: done in main():
-                print "Starting EchoTree server at port %d: pushes new word trees to all connecting clients." % self.port;
-                application = tornado.web.Application([(r"/", EchoTreeService)]);
-                application.listen(self.port);
-                IOLoop.instance().start();
-            elif self.socketServerClassName == 'NewEchoTreeSubmissionService':
-                print "Starting EchoTree new tree submissions server %d: accepts word trees submitted from connecting clients." % self.port;
+            if  self.socketServerClassName == 'NewEchoTreeSubmissionService':
+                EchoTreeService.log("Starting EchoTree new tree submissions server %d: accepts word trees submitted from connecting clients." % self.port);
                 http_server = NewEchoTreeSubmissionService(NewEchoTreeSubmissionService.handle_request);
                 http_server.listen(self.port);
-                IOLoop.instance().start()
+                self.ioLoop = IOLoop.instance();
+                self.ioLoop.start();
+                self.ioLoop.close(all_fds=True);
+                return;
             elif self.socketServerClassName == 'EchoTreeScriptRequestHandler':
-                print "Starting EchoTree script server %d: Returns one script that listens to the new-tree events in the browser." % self.port;
+                EchoTreeService.log("Starting EchoTree script server %d: Returns one script that listens to the new-tree events in the browser." % self.port);
                 http_server = EchoTreeScriptRequestHandler(EchoTreeScriptRequestHandler.handle_request);
                 http_server.listen(self.port);
-                IOLoop.instance().start();
+                self.ioLoop = IOLoop.instance(); 
+                self.ioLoop.start();
+                self.ioLoop.close(all_fds=True);
+                return;
             else:
                 raise ValueError("Service class %s is unknown." % self.socketServerClassName);
         except Exception, e:
@@ -298,24 +342,72 @@ class SocketServerThreadStarter(Thread):
 #                print "Exception: %s. You need to try starting this service again. Socket busy condition will time out within 30 secs or so." % `e`
 #            else:
 #                print `e`;
-            raise e;
+            #raise e;
+            pass
+        finally:
+            if self.ioLoop.running():
+                self.ioLoop.stop();
+                return;
 
 
 if __name__ == '__main__':
 
-    # Create the service that accepts new JSON trees for distribution:
-    SocketServerThreadStarter('NewEchoTreeSubmissionService', ECHO_TREE_NEW_ROOT_PORT).start();
+    parser = argparse.ArgumentParser(prog='echo_tree_server')
+    parser.add_argument("-l", "--logFile, help=fully qualified log file name. Default: no logging.", dest='logFile');
+    parser.add_argument("-v", "--verbose, help=print operational info to console.", 
+                        dest='verbose',
+                        action='store_true');
+    
+    
+    args = parser.parse_args();
+    if args.logFile is not None:
+        try:
+            EchoTreeService.logFD = open(args.logFile, 'w');
+        except IOError, e:
+            print "Cannot open log file '%s' for writing. Server not started." % args.logFile;
+            sys.exit();
+    
+    if args.verbose:
+        EchoTreeService.logToConsole = True;
+
+    # Create the service that accepts new words, and distributes the corresponding
+    # JSON tree to all connected browsers:
+    EchoTreeService.log('Starting listener for new root words via HTTP at port %d' % ECHO_TREE_NEW_ROOT_PORT);
+    rootWordAcceptor = SocketServerThreadStarter('NewEchoTreeSubmissionService', ECHO_TREE_NEW_ROOT_PORT); 
+    rootWordAcceptor.start();
     
     # Create the service that serves out a small JS script that listens to the new-tree events:
-    SocketServerThreadStarter('EchoTreeScriptRequestHandler', ECHO_TREE_SCRIPT_SERVER_PORT).start();
+    EchoTreeService.log('Starting EchoTree script server at port %d' % ECHO_TREE_SCRIPT_SERVER_PORT);
+    scriptServer = SocketServerThreadStarter('EchoTreeScriptRequestHandler', ECHO_TREE_SCRIPT_SERVER_PORT); 
+    scriptServer.start();
     
-    print "Starting TreeComputer thread: computes new tree from Web-submitted words, using echo_tree.";
-    NewEchoTreeSubmissionService.TreeComputer().start();    
+    EchoTreeService.log("Starting TreeComputer thread: computes new tree from Web-submitted words, using echo_tree.");
+    treeComputerThread = NewEchoTreeSubmissionService.TreeComputer(); 
+    treeComputerThread.start();    
     
-    print "Starting EchoTree server at port %s: pushes new word trees to all connecting clients." % "/subscribe_to_echo_trees";
+    EchoTreeService.log("Starting EchoTree server at port %s: pushes new word trees to all connecting clients." % "/subscribe_to_echo_trees");
     application = tornado.web.Application([(r"/subscribe_to_echo_trees", EchoTreeService),
                                            ]);
                                            
     application.listen(ECHO_TREE_GET_PORT);
-    IOLoop.instance().start()                            
-
+    try:
+        ioLoop = IOLoop.instance();
+        try:
+            ioLoop.start()
+            ioLoop.close(all_fds=True);
+        except Exception, e:
+            ioLoop.stop();
+            if e.__class__ == KeyboardInterrupt:
+                raise e;
+    except KeyboardInterrupt:
+        EchoTreeService.log("Stopping EchoTree servers...");
+        if ioLoop.running():
+            ioLoop.stop();
+        rootWordAcceptor.stop();
+        scriptServer.stop();
+        treeComputerThread.stop();
+        EchoTreeService.log("EchoTree servers stopped.");
+        if EchoTreeService.logFD is not None:
+            EchoTreeService.logFD.close();
+        os._exit(0);
+        
