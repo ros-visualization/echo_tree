@@ -118,8 +118,8 @@ class EchoTreeService(WebSocketHandler):
         @type message: string
         '''
         newRootWord = message.encode('utf-8');
-        #******EchoTreeService.log("New root word from connected browser: '%s'." % newRootWord);
-        #******NewEchoTreeSubmissionService.triggerTreeComputationAndDistrib(newRootWord);
+        RootWordSubmissionService.triggerTreeComputationAndDistrib(newRootWord);
+        EchoTreeService.log("New root word from connected browser: '%s'." % newRootWord);
     
     def on_close(self):
         '''
@@ -193,7 +193,7 @@ class EchoTreeService(WebSocketHandler):
 # -----------------------------------------  Class for submission of new EchoTrees ---------------    
     
     
-class NewEchoTreeSubmissionService(HTTPServer):
+class RootWordSubmissionService(HTTPServer):
     '''
     Service for submitting a new root word. Service will
     compute a new tree, and cause it to be distributed to
@@ -201,8 +201,8 @@ class NewEchoTreeSubmissionService(HTTPServer):
     '''
     
 #    def __init__(self, requestHandler):
-#        super(NewEchoTreeSubmissionService, self).__init__(requestHandler);
-#        NewEchoTreeSubmissionService.wordExplorer = WordExplorer(DBPATH);
+#        super(RootWordSubmissionService, self).__init__(requestHandler);
+#        RootWordSubmissionService.wordExplorer = WordExplorer(DBPATH);
     
     @staticmethod
     def handle_request(request):
@@ -216,14 +216,14 @@ class NewEchoTreeSubmissionService(HTTPServer):
         '''
         
         EchoTreeService.log("New root via HTTP; word '%s' from %s (%s)..." % (request.body, request.host, request.remote_ip));    
-        NewEchoTreeSubmissionService.triggerTreeComputationAndDistrib(request.body);
+        RootWordSubmissionService.triggerTreeComputationAndDistrib(request.body);
 
     @staticmethod
     def triggerTreeComputationAndDistrib(newRootWord):
-        if newRootWord == NewEchoTreeSubmissionService.TreeComputer.rootWord:
+        if newRootWord == RootWordSubmissionService.TreeComputer.rootWord:
             return;
-        NewEchoTreeSubmissionService.TreeComputer.rootWord = newRootWord;
-        NewEchoTreeSubmissionService.TreeComputer.newWordEvent.set();
+        RootWordSubmissionService.TreeComputer.rootWord = newRootWord;
+        RootWordSubmissionService.TreeComputer.newWordEvent.set();
     
     def on_close(self):
         pass
@@ -237,19 +237,19 @@ class NewEchoTreeSubmissionService(HTTPServer):
         singletonRunning = False;
         
         def __init__(self):
-            super(NewEchoTreeSubmissionService.TreeComputer, self).__init__();
-            if NewEchoTreeSubmissionService.TreeComputer.singletonRunning:
+            super(RootWordSubmissionService.TreeComputer, self).__init__();
+            if RootWordSubmissionService.TreeComputer.singletonRunning:
                 raise RuntimeError("Only one TreeComputer instance may run per process.");
-            NewEchoTreeSubmissionService.TreeComputer.singletonRunning = True;
+            RootWordSubmissionService.TreeComputer.singletonRunning = True;
         
         def stop(self):
-            NewEchoTreeSubmissionService.TreeComputer.keepRunning = False;
+            RootWordSubmissionService.TreeComputer.keepRunning = False;
         
         def run(self):
             self.wordExplorer = WordExplorer(DBPATH);
-            while NewEchoTreeSubmissionService.TreeComputer.keepRunning:
-                NewEchoTreeSubmissionService.TreeComputer.newWordEvent.wait();
-                newJSONEchoTreeStr = self.wordExplorer.makeJSONTree(self.wordExplorer.makeWordTree(NewEchoTreeSubmissionService.TreeComputer.rootWord));
+            while RootWordSubmissionService.TreeComputer.keepRunning:
+                RootWordSubmissionService.TreeComputer.newWordEvent.wait();
+                newJSONEchoTreeStr = self.wordExplorer.makeJSONTree(self.wordExplorer.makeWordTree(RootWordSubmissionService.TreeComputer.rootWord));
                 
                 # Store the new tree in the appropriate EchoTreeService class variable:
                 with EchoTreeService.currentEchoTreeLock:
@@ -258,8 +258,8 @@ class NewEchoTreeSubmissionService(HTTPServer):
                 # Signal to the new-tree-arrived event pushers that a new
                 # jsonTree has arrived, and they should push it to their clients:
                 EchoTreeService.notifyInterestedParties();
-                NewEchoTreeSubmissionService.TreeComputer.newWordEvent.clear();
-                EchoTreeService.log(NewEchoTreeSubmissionService.TreeComputer.rootWord);
+                RootWordSubmissionService.TreeComputer.newWordEvent.clear();
+                EchoTreeService.log(RootWordSubmissionService.TreeComputer.rootWord);
                 EchoTreeService.log(newJSONEchoTreeStr);
         
 # --------------------  Request Handler Class for browsers requesting the JavaScript that knows to open an EchoTreeService connection ---------------
@@ -326,9 +326,9 @@ class SocketServerThreadStarter(Thread):
         '''
         super(SocketServerThreadStarter, self).run();
         try:
-            if  self.socketServerClassName == 'NewEchoTreeSubmissionService':
+            if  self.socketServerClassName == 'RootWordSubmissionService':
                 EchoTreeService.log("Starting EchoTree new tree submissions server %d: accepts word trees submitted from connecting clients." % self.port);
-                http_server = NewEchoTreeSubmissionService(NewEchoTreeSubmissionService.handle_request);
+                http_server = RootWordSubmissionService(RootWordSubmissionService.handle_request);
                 http_server.listen(self.port);
                 self.ioLoop = IOLoop();
                 self.ioLoop.start();
@@ -354,7 +354,7 @@ class SocketServerThreadStarter(Thread):
             #raise e;
             pass
         finally:
-            if self.ioLoop.running():
+            if self.ioLoop is not None and self.ioLoop.running():
                 self.ioLoop.stop();
                 return;
 
@@ -382,7 +382,7 @@ if __name__ == '__main__':
     # Create the service that accepts new words, and distributes the corresponding
     # JSON tree to all connected browsers:
     EchoTreeService.log('Starting listener for new root words via HTTP at port %d' % ECHO_TREE_NEW_ROOT_PORT);
-    rootWordAcceptor = SocketServerThreadStarter('NewEchoTreeSubmissionService', ECHO_TREE_NEW_ROOT_PORT); 
+    rootWordAcceptor = SocketServerThreadStarter('RootWordSubmissionService', ECHO_TREE_NEW_ROOT_PORT); 
     rootWordAcceptor.start();
     
     # Create the service that serves out a small JS script that listens to the new-tree events:
@@ -391,7 +391,7 @@ if __name__ == '__main__':
     scriptServer.start();
     
     EchoTreeService.log("Starting TreeComputer thread: computes new tree from Web-submitted words, using echo_tree.");
-    treeComputerThread = NewEchoTreeSubmissionService.TreeComputer(); 
+    treeComputerThread = RootWordSubmissionService.TreeComputer(); 
     treeComputerThread.start();    
     
     EchoTreeService.log("Starting EchoTree server at port %s: pushes new word trees to all connecting clients." % "/subscribe_to_echo_trees");

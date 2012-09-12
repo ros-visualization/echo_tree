@@ -3,6 +3,7 @@
   <head>
     <script type="text/javascript" src="http://d3js.org/d3.v2.min.js?2.10.0"></script>
     <!-- ****<script type="text/javascript" src="http://d3js.org/d3.v2.min.js?2.10.0"></script> -->
+
     <style type="text/css">        
     .node circle {
 	cursor: pointer;
@@ -25,7 +26,10 @@
   </head>
   <body>
     <div id=userMsg>
-    Starting to listen for word trees...
+     New word: <input type="text" name="newWord" id="newWord" 
+		      onkeydown="window.handleEnterInWordFld();" />
+
+     <button onclick="window.sendNewRootWord();">Get New Tree</button>
     </div>
     <div id="echotree">
     </div>
@@ -62,6 +66,7 @@ if(typeof(WebSocket)!=="undefined") {
   // where this script came from:
   //var ws = new WebSocket("ws://duo:5001/subscribe_to_echo_trees");
   var ws = new WebSocket("ws://mono.stanford.edu:5001/subscribe_to_echo_trees");
+  //var ws = new WebSocket("ws://localhost:5001/subscribe_to_echo_trees");
 
   ws.onopen = function () {
   };
@@ -92,11 +97,29 @@ if(typeof(WebSocket)!=="undefined") {
       }
     }
     
-    // Commented-out code collapses tree initially.
-    //root.followWordObjs.forEach(collapse);
-    //update(root);
+    // Children are visible, followWordObjs are not.
+    // Expand turns everything into children.
+    function expand(d) {
+      console.log('expanding ' + d.word);
+      if (d.followWordObjs) {
+	if (d.followWordObjs.length > 0) {
+	  console.log(' * expanding fwos')
+	  d.children = d.followWordObjs;
+	  d.followWordObjs = null;
+	  d.children.forEach(expand)
+	}
+      }
+      
+      if (d.children) {
+	if (d.children.length > 0) {
+	  d.children.forEach(expand)
+	}
+      }
+    }
+    
+    root.followWordObjs.forEach(expand);
     toggle(root);
-
+    update(root);
   };
 
 
@@ -121,7 +144,13 @@ function update(source) {
   var nodeEnter = node.enter().append('g')
     .attr('class', 'node')
     .attr('transform', function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    .on("click", toggle);
+    .on("mousedown", function(event){handleMouseDown(event, this);})
+
+    //.on("click", toggle);
+    //.addEventListener("onmousedown",handleMouseDown,false) //not def
+    // Works for Chrome: .on("mousedown", handleMouseDown)
+    //.onclick = function(event){handleMouseDown(event, this);};
+    //if (nodeEnter.captureEvents) nodeEnter.captureEvents(Event.MOUSEDOWN);
     //****.on("singletap", toggle);
     //***.singletap(toggle).doubletap(function(e) {ws.write("small");});
     //***.on("doubletap", function(e) {ws.write("small");});
@@ -203,10 +232,37 @@ function update(source) {
   });
 }
 
+
+// Given a word, tell browser to make
+// that word into the new root.
+function sendNewRootWord() {
+  word = document.getElementById("newWord").value;
+  ws.send(word);
+}
+
+
+// Make ENTER key submit new root word when in text field:
+function handleEnterInWordFld(e) {
+    if (!e) { var e = window.event; }
+    // Enter is pressed?
+    if (e.keyCode == 13) { sendNewRootWord(); }
+}
+
+
+// Handle mouse down events to distinguish between
+// left and middle button:
+function handleMouseDown(node) {
+   //alert("Word: " + node.word);
+   //alert("Button: " + this.event.which);
+   if (this.event.which == 2)
+     ws.send(node.word);
+   else if (this.event.which == 1)
+     toggle(node);
+}
+
 // Toggle children on node click.
 function toggle(d) {
   
-  ws.send(d.word);			// Send data back to server;
   if (d.children) {
       d.followWordObjs = d.children;
       d.children = null;
