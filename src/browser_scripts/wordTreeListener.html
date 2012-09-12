@@ -20,9 +20,12 @@
 	stroke-width: 2px;
     }           
     </style>
+    <meta charset="UTF-8">
   </head>
   <body>
+    <div id=userMsg>
     Starting to listen for word trees...
+    </div>
     <div id="echotree">
     </div>
     <script type="text/javascript">
@@ -52,6 +55,7 @@ var vis = d3.select("#echotree").append('svg')
     
 // Check for browser support:
 if(typeof(WebSocket)!=="undefined") {
+
 
   // Create a WebSocket connected back to the EchoTree server 
   // where this script came from:
@@ -87,12 +91,17 @@ if(typeof(WebSocket)!=="undefined") {
       }
     }
     
-    root.followWordObjs.forEach(collapse);
-    update(root);
+    // Commented-out code collapses tree initially.
+    //root.followWordObjs.forEach(collapse);
+    //update(root);
+    toggle(root);
+
   };
+
+
 } else {
   // WebSockets not supported in this browser:
-  document.getElementById("newTree").innerHTML="Whoops! Your browser doesn't support WebSockets.";
+  document.getElementById("userMsg").innerHTML="Whoops! Your browser doesn't support WebSockets.";
 }
 
 function update(source) {
@@ -186,7 +195,7 @@ function update(source) {
   // Stash the old positions for transition.
   nodes.forEach(function(d) {
       d.x0 = d.x;
-      d.y0 + d.y;
+      d.y0 = d.y;
   });
 }
 
