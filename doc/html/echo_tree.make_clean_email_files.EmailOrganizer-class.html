@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer</title>
+  <title>echo_tree.make_clean_email_files.EmailOrganizer</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -38,9 +38,8 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="echo_tree-module.html">Package&nbsp;echo_tree</a> ::
-        <a href="echo_tree.echo_tree_server-module.html">Module&nbsp;echo_tree_server</a> ::
-        <a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService-class.html">Class&nbsp;NewEchoTreeSubmissionService</a> ::
-        Class&nbsp;TreeComputer
+        <a href="echo_tree.make_clean_email_files-module.html">Module&nbsp;make_clean_email_files</a> ::
+        Class&nbsp;EmailOrganizer
       </span>
     </td>
     <td>
@@ -50,22 +49,18 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer-class.html"
+            >]&nbsp;|&nbsp;<a href="echo_tree.make_clean_email_files.EmailOrganizer-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class TreeComputer</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class EmailOrganizer</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-        object --+        
-                 |        
-threading._Verbose --+    
-                     |    
-      threading.Thread --+
-                         |
-                        <strong class="uidshort">NewEchoTreeSubmissionService.TreeComputer</strong>
+object --+
+         |
+        <strong class="uidshort">EmailOrganizer</strong>
 </pre>
 
 <hr />
@@ -92,10 +87,12 @@ threading._Verbose --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      x.__init__(...) initializes x; see help(type(x)) for signature</td>
+          <td><span class="summary-sig"><a href="echo_tree.make_clean_email_files.EmailOrganizer-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">mailDirRoot</span>,
+        <span class="summary-sig-arg">targetDBPath</span>)</span><br />
+      Prepare for creating the database.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer.__init__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.__init__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -109,9 +106,33 @@ threading._Verbose --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="stop"></a><span class="summary-sig-name">stop</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a name="createInMemoryWordStats"></a><span class="summary-sig-name">createInMemoryWordStats</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">numMessages</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer.stop">source&nbsp;code</a></span>
+            <span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.createInMemoryWordStats">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">(int,int) @raises ValueError if output directory does not exist</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="echo_tree.make_clean_email_files.EmailOrganizer-class.html#createEmailCollection" class="summary-sig-name">createEmailCollection</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">outputDirPath</span>,
+        <span class="summary-sig-arg">filePrefix</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">email</code><code class="variable-quote">'</code></span>,
+        <span class="summary-sig-arg">maxContent</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">deleteEmailHeaders</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">deleteFilesWithHeaders</span>=<span class="summary-sig-default">True</span>)</span><br />
+      Pulls all email messages from a directory tree, using the 
+      EmailMessageFeeder class.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.createEmailCollection">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -125,9 +146,12 @@ threading._Verbose --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.NewEchoTreeSubmissionService.TreeComputer-class.html#run" class="summary-sig-name">run</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="echo_tree.make_clean_email_files.EmailOrganizer-class.html#deleteEmailHeaders" class="summary-sig-name">deleteEmailHeaders</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">emailDirectory</span>)</span><br />
+      Go through each file in the given directory, ignoring files with 
+      &quot;_NoHeads&quot; in the name.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer.run">source&nbsp;code</a></span>
+            <span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.deleteEmailHeaders">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -137,25 +161,6 @@ threading._Verbose --+
   </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>threading.Thread</code></b>:
-      <code>__repr__</code>,
-      <code>getName</code>,
-      <code>isAlive</code>,
-      <code>isDaemon</code>,
-      <code>is_alive</code>,
-      <code>join</code>,
-      <code>setDaemon</code>,
-      <code>setName</code>,
-      <code>start</code>
-      </p>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>threading.Thread</code></b> (private):
-      <code>_reset_internal_locks</code>,
-      <code>_set_daemon</code>,
-      <code>_set_ident</code>
-      </p></div>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>threading._Verbose</code></b> (private):
-      <code>_note</code>
-      </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
       <code>__format__</code>,
@@ -164,6 +169,7 @@ threading._Verbose --+
       <code>__new__</code>,
       <code>__reduce__</code>,
       <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
       <code>__setattr__</code>,
       <code>__sizeof__</code>,
       <code>__str__</code>,
@@ -193,28 +199,7 @@ threading._Verbose --+
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="rootWord"></a><span class="summary-name">rootWord</span> = <code title="None">None</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="newWordEvent"></a><span class="summary-name">newWordEvent</span> = <code title="Event()">Event()</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="keepRunning"></a><span class="summary-name">keepRunning</span> = <code title="True">True</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="singletonRunning"></a><span class="summary-name">singletonRunning</span> = <code title="False">False</code>
+        <a name="DELETE_EMBEDDED_HEADERS"></a><span class="summary-name">DELETE_EMBEDDED_HEADERS</span> = <code title="True">True</code>
     </td>
   </tr>
 </table>
@@ -237,14 +222,6 @@ threading._Verbose --+
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>threading.Thread</code></b>:
-      <code>daemon</code>,
-      <code>ident</code>,
-      <code>name</code>
-      </p>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>threading.Thread</code></b> (private):
-      <code>_block</code>
-      </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__class__</code>
       </p>
@@ -276,42 +253,107 @@ threading._Verbose --+
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">mailDirRoot</span>,
+        <span class="sig-arg">targetDBPath</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer.__init__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.__init__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
+  <p>Prepare for creating the database.</p>
   <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>mailDirRoot</code></strong> (string) - fully qualified directory of raw-email root directory</li>
+        <li><strong class="pname"><code>targetDBPath</code></strong> (string) - fully qualified filename of final SQLite database</li>
+    </ul></dd>
     <dt>Overrides:
         object.__init__
-        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
 </div>
-<a name="run"></a>
+<a name="createEmailCollection"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">run</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">createEmailCollection</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">outputDirPath</span>,
+        <span class="sig-arg">filePrefix</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">email</code><code class="variable-quote">'</code></span>,
+        <span class="sig-arg">maxContent</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">deleteEmailHeaders</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">deleteFilesWithHeaders</span>=<span class="sig-default">True</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#NewEchoTreeSubmissionService.TreeComputer.run">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.createEmailCollection">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  
+  <p>Pulls all email messages from a directory tree, using the 
+  EmailMessageFeeder class. Creates a series of EMAIL_FILE_CHUNCK_SIZE 
+  files with the resulting email messages. Within these chunk files 
+  messages are separated with a standard string that contains a serial 
+  number of the following email message. The string is constructed by 
+  concatenating 
+  EMAL_SEPARATOR_PREFIX&lt;serialNumber&gt;EMAIL_SEPARATOR_POSTFIX. 
+  Example:</p>
+  <p>#*/123*/-------------------------#^@</p>
+  <p>The chunks are named &lt;filePrefix&gt;&lt;serialNumber&gt;.txt</p>
+  <p>If deleteEmailHeaders is True, each chunk of email messages is scanned
+  by Unix stream editor sed to remove email headers. A new chunk file is 
+  created and named &lt;filePrefix&gt;&lt;serialNumber&gt;_NoHeads.txt.</p>
+  <p>If deleteFilesWithHeaders is True, the initial, headers-containing 
+  chunk files are deleted after the headers are cleaned out. Else the files
+  are retained. Note that this roughly doubles the size of the 
+  directory.</p>
   <dl class="fields">
-    <dt>Overrides:
-        threading.Thread.run
-    </dt>
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>outputDirPath</code></strong> (string) - path to where output files will be stored</li>
+        <li><strong class="pname"><code>filePrefix</code></strong> (string) - string prepended to each email file chunk, which is followed by a
+          serial number.</li>
+        <li><strong class="pname"><code>maxContent</code></strong> (int) - limit to number of bytes worth of email messages to process.</li>
+        <li><strong class="pname"><code>deleteEmailHeaders</code></strong> (boolean) - if True, email headers will be deleted from the results</li>
+        <li><strong class="pname"><code>deleteFilesWithHeaders</code></strong> (boolean) - if True, and if headerless versions were created (i.e. 
+          deleteEmailHeaders was True), then the initial email files that 
+          include headers will be deleted.</li>
+    </ul></dd>
+    <dt>Returns: (int,int) @raises ValueError if output directory does not exist</dt>
+        <dd>number of email messages collected, and total number of bytes</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="deleteEmailHeaders"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">deleteEmailHeaders</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">emailDirectory</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="echo_tree.make_clean_email_files-pysrc.html#EmailOrganizer.deleteEmailHeaders">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Go through each file in the given directory, ignoring files with 
+  &quot;_NoHeads&quot; in the name. Run each file through the Unix sed 
+  editor to remove email headers. That script creates files with email 
+  headers removed. Those files are named the original names, with 
+  '_NoHeads' added.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>emailDirectory</code></strong> (string) - directory containing files with any number of email messages.</li>
+    </ul></dd>
   </dl>
 </td></tr></table>
 </div>

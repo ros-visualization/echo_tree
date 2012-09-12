@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>echo_tree.echo_tree_server.EchoTreeScriptRequestHandler</title>
+  <title>echo_tree.make_database_from_emails.SentenceFeeder</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -38,8 +38,8 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="echo_tree-module.html">Package&nbsp;echo_tree</a> ::
-        <a href="echo_tree.echo_tree_server-module.html">Module&nbsp;echo_tree_server</a> ::
-        Class&nbsp;EchoTreeScriptRequestHandler
+        <a href="echo_tree.make_database_from_emails-module.html">Module&nbsp;make_database_from_emails</a> ::
+        Class&nbsp;SentenceFeeder
       </span>
     </td>
     <td>
@@ -49,28 +49,27 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="echo_tree.echo_tree_server.EchoTreeScriptRequestHandler-class.html"
+            >]&nbsp;|&nbsp;<a href="echo_tree.make_database_from_emails.SentenceFeeder-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class EchoTreeScriptRequestHandler</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class SentenceFeeder</h1><p class="nomargin-top"><span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-               object --+        
-                        |        
-tornado.netutil.TCPServer --+    
-                            |    
-tornado.httpserver.HTTPServer --+
-                                |
-                               <strong class="uidshort">EchoTreeScriptRequestHandler</strong>
+object --+
+         |
+        <strong class="uidshort">SentenceFeeder</strong>
 </pre>
 
 <hr />
-<p>Web service serving a single JavaScript containing HTML page. That 
-  page contains instructions for requesting an event stream for new 
-  EchoTree instances from this server.</p>
+<p>Iterator over sentences of the entire email collection. Each call to 
+  next() returns one string of tokens enclosed in brackets, and separated 
+  by ' ,'.</p>
+  <p>Can operate once email files have been concatenated into chunk files, 
+  have been cleaned of headers and other clutter, and have been sentence 
+  segmented and tokenized. See notes.txt in package root.</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -89,23 +88,76 @@ tornado.httpserver.HTTPServer --+
     </table>
   </td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="echo_tree.make_database_from_emails.SentenceFeeder-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">dirToTokens</span>)</span><br />
+      Expects a directory containing chunk files of the form 
+      email12_NoHeads_Tokens.txt, with 12 being an example of a changing 
+      serial number.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="ingestOneTokenFile"></a><span class="summary-sig-name">ingestOneTokenFile</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder.ingestOneTokenFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__iter__"></a><span class="summary-sig-name">__iter__</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder.__iter__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="next"></a><span class="summary-sig-name">next</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder.next">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.httpserver.HTTPServer</code></b>:
-      <code>__init__</code>,
-      <code>handle_stream</code>
-      </p>
-    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b>:
-      <code>add_socket</code>,
-      <code>add_sockets</code>,
-      <code>bind</code>,
-      <code>listen</code>,
-      <code>start</code>,
-      <code>stop</code>
-      </p>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>tornado.netutil.TCPServer</code></b> (private):
-      <code>_handle_connection</code>
-      </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
       <code>__format__</code>,
@@ -120,41 +172,6 @@ tornado.httpserver.HTTPServer --+
       <code>__str__</code>,
       <code>__subclasshook__</code>
       </p>
-    </td>
-  </tr>
-</table>
-<!-- ==================== STATIC METHODS ==================== -->
-<a name="section-StaticMethods"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Static Methods</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-StaticMethods"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="echo_tree.echo_tree_server.EchoTreeScriptRequestHandler-class.html#handle_request" class="summary-sig-name">handle_request</a>(<span class="summary-sig-arg">request</span>)</span><br />
-      Hangles the HTTP GET request.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.handle_request">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
     </td>
   </tr>
 </table>
@@ -201,27 +218,40 @@ tornado.httpserver.HTTPServer --+
   </td>
 </tr>
 </table>
-<a name="handle_request"></a>
+<a name="__init__"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">handle_request</span>(<span class="sig-arg">request</span>)</span>
-    <br /><em class="fname">Static Method</em>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">dirToTokens</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="echo_tree.echo_tree_server-pysrc.html#EchoTreeScriptRequestHandler.handle_request">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="echo_tree.make_database_from_emails-pysrc.html#SentenceFeeder.__init__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Hangles the HTTP GET request.</p>
+  <p>Expects a directory containing chunk files of the form 
+  email12_NoHeads_Tokens.txt, with 12 being an example of a changing serial
+  number. Each file is expected to contain a series of bracketed, 
+  comma-separated tokens. Each bracket pair delineates one sentence.</p>
+  <p>Message boundaries are marked with this sequence of tokens:</p>
+  <p>[#, \/, \*, 383867, \*, \/, !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, #, 
+  ^, @,...]</p>
+  <p>where the number is the serial number of the following email.</p>
+  <p>Method creates a sorted list of the chunk file names in 
+  self.sortedEmailChunks.</p>
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>request</code></strong> (???) - instance holding information about the request</li>
+        <li><strong class="pname"><code>dirToTokens</code></strong> (string) - directory path to email token chunk files</li>
     </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
   </dl>
 </td></tr></table>
 </div>

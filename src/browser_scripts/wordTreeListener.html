@@ -2,6 +2,7 @@
 <html>
   <head>
     <script type="text/javascript" src="http://d3js.org/d3.v2.min.js?2.10.0"></script>
+    <!-- ****<script type="text/javascript" src="http://d3js.org/d3.v2.min.js?2.10.0"></script> -->
     <style type="text/css">        
     .node circle {
 	cursor: pointer;
@@ -121,6 +122,9 @@ function update(source) {
     .attr('class', 'node')
     .attr('transform', function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
     .on("click", toggle);
+    //****.on("singletap", toggle);
+    //***.singletap(toggle).doubletap(function(e) {ws.write("small");});
+    //***.on("doubletap", function(e) {ws.write("small");});
     
   // Node circles start tiny and gray.
   nodeEnter.append("circle")

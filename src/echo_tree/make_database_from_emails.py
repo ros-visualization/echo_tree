@@ -354,7 +354,7 @@ class TokenFromSentenceFeeder(object):
         [this, 'll, blow, your, mind]. If endOfCurrMatch
         is 5, then this method returns "'ll". 
         @param endOfCurrMatch: index to the comma that follows the current token.
-        @type token: int
+        @type endOfCurrMatch: int
         '''
         matchObj = self.contractionTest.search(self.sentence, endOfCurrMatch);
         # If we have no match, done:

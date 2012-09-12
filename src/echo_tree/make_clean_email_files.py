@@ -83,7 +83,7 @@ class EmailOrganizer(object):
         @type deleteFilesWithHeaders: boolean
         @return: number of email messages collected, and total number of bytes
         @rtype: (int,int)
-        @raises: ValueError if output directory does not exist
+        @raises ValueError if output directory does not exist
         '''
         
         # Test whether the output dir exists before doing any work:
