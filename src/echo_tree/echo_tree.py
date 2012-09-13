@@ -222,4 +222,3 @@ if __name__ == "__main__":
     jsonTree = explorer.makeJSONTree(explorer.makeWordTree('echo'));
     print jsonTree;
     
-        
