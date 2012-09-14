@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 
 import os;
-import sys;
-import socket;
 
 import sqlite3;
 import json;
-from contextlib import contextmanager;
-from operator import itemgetter;
 from collections import OrderedDict;
 
 '''

@@ -182,7 +182,7 @@ class TokenFeeder(object):
     def __iter__(self):
         return self;
     
-    def next(self):
+    def next(self): #@ReservedAssignment
         while 1:
             if self.currSentence is None:
                 # Will throw StopIteration when no more sentences:
@@ -241,13 +241,13 @@ class TokenFromSentenceFeeder(object):
     # Example email separator: The number is the ID of the next email:
     emailSep = "#, \/, \*, 5, \*, \/, !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, #, ^, @"
 
-	# Regular expressions for use in weeding out bad tokeans:
+    # Regular expressions for use in weeding out bad tokeans:
     allPunctuationTest = re.compile('[^,!;.?]') #  If None: only punctuation
     allCapsTest = re.compile('[a-z]')        # If None: only Upper case
     contractionTest = re.compile("('[^,]*)"); # If non-None, then matchObj.group(1) is the contraction
-	# Regexp pattern that matches <anything>#, \/, \*, 383869, \*, \/, !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, #, ^, @<anything>
-	# The three groups (parenthsized portions) capture, respectively everything before the opening '#',
-	# the number (email ID of following msg), and everything after the closing '@':
+    # Regexp pattern that matches <anything>#, \/, \*, 383869, \*, \/, !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, #, ^, @<anything>
+    # The three groups (parenthsized portions) capture, respectively everything before the opening '#',
+    # the number (email ID of following msg), and everything after the closing '@':
     messageSepTest = re.compile("([^#]*)#, \\\\/, \\\\*.*[\\s]([0-9]*),.*, !{36}, #, \\^, @(.*)");
     
     #firstTokenExtract = "\[([^,\]]*)[,\]]";
@@ -263,7 +263,7 @@ class TokenFromSentenceFeeder(object):
     def __iter__(self):
         return self;
     
-    def next(self):
+    def next(self): #@ReservedAssignment
         '''
         Returns a Token instance holding the next token's 
         email message ID, its sentence ID, and the word. None
@@ -287,7 +287,7 @@ class TokenFromSentenceFeeder(object):
                 # The ID of the upcoming message:
                 try: 
                     self.nextMsgID = int(nextEmailID);
-                except ValueError as e:
+                except ValueError:
                     # Email recognition fails when two message headers are in
                     # a single sentence. In that case, nextEmailID is an empty
                     # string. We just bump the latest msg ID we know about:
@@ -313,7 +313,7 @@ class TokenFromSentenceFeeder(object):
             else:
                 raise StopIteration;
         if matchObj is None:
-           return None;
+            return None;
         
         # The regexp pattern creates two groups. The first is always None
         # for the first token in each sentence. The second is always None
@@ -633,7 +633,7 @@ class WordIndex(object):
         def __iter__(self):
             return self;
         
-        def next(self):
+        def next(self): #@ReservedAssignment
             '''
             Get next key from the WordIndex.allPostings dict (a word), and 
             return its item: a WordPosting.
@@ -818,7 +818,6 @@ if __name__ == '__main__':
     # The -t or --test option was given to the script implementation. Do unittesting:
     
     import unittest
-    import shutil
     
     testAll = False;
 

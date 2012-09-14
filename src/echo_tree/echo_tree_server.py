@@ -98,6 +98,15 @@ class EchoTreeService(WebSocketHandler):
 #        with EchoTreeService.activeHandlersChangeLock:
 #            EchoTreeService.activeHandlers.append(handler);
     
+    def allow_draft76(self):
+        '''
+        Allow WebSocket connections via the old Draft-76 protocol. It has some
+        security issues, and was replaced. However, Safari (i.e. e.g. iPad) 
+        don't implement the new protocols yet. Overriding this method, and 
+        returning True will allow those connections.
+        '''
+        return True
+    
     def open(self): #@ReservedAssignment
         '''
         Called by WebSocket/tornado when a client connects. Method must
@@ -344,7 +353,7 @@ class SocketServerThreadStarter(Thread):
                 return;
             else:
                 raise ValueError("Service class %s is unknown." % self.socketServerClassName);
-        except Exception, e:
+        except Exception:
             # Typically an exception is caught here that complains about 'socket in use'
             # Should avoid that by sensing busy socket and timing out:
 #            if e.errno == 98:
