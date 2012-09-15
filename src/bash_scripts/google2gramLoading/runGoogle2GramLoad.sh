@@ -6,5 +6,5 @@
 for i in {0..99..4}
 do
     # Every run grabs 4 of the 20gram files from Google:
-    /dfs/rulk/0/paepcke/fuerte/stacks/echo_tree/src/bash_scripts/google2gramLoading/download2GramFiles.sh $i 4
+    qsub /dfs/rulk/0/paepcke/fuerte/stacks/echo_tree/src/bash_scripts/google2gramLoading/download2GramFiles.sh $i 4
 done
