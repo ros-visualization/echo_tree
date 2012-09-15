@@ -1,3 +1,6 @@
+- Tinyurl for http://mono.stanford.edu:5000
+     http://tinyurl.com/8kahfxj
+
 - The Enron email database is processed from the initial untarred
   directory tree with email files at the leafs by using scripts in
   src/bash_scripts:

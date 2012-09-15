@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html>
   <head>
@@ -31,8 +32,32 @@
 
      <button onclick="window.sendNewRootWord();">Get New Tree</button>
     </div>
+		<select id="pulldown" onchange="handleChange(this);">
+			<option value="">Shortcuts:</option>
+			<option value="after">after</option>
+			<option value="also">also</option>
+			<option value="because">because</option>
+			<option value=".">.</option>
+			<option value="what">what</option>
+			<option value="where">where</option>
+			<option value="if">if</option>
+			<option value="must">must</option>
+			<option value="my">my</option>
+			<option value="say">say</option>
+			<option value="we">we</option>
+			<option value="his">his</option>
+			<option value="her">her</option>
+			<option value="every">every</option>
+			<option value="either">either</option>
+		</select>
+
     <div id="echotree">
     </div>
+		<input type="text" name="ticker" id="ticker"/>
+		<br/>
+		<button onclick="onCorrect();">That's Right!</button>
+		<button onclick="onIncorrect();">Not That</button>
+		<button onclick="onRestart();">Start Over</button>
     <script type="text/javascript">
 
 // Dimentions and other core viz elements
@@ -144,7 +169,6 @@ function update(source) {
   var nodeEnter = node.enter().append('g')
     .attr('class', 'node')
     .attr('transform', function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    .on("mousedown", function(event){handleMouseDown(event, this);})
 
     //.on("click", toggle);
     //.addEventListener("onmousedown",handleMouseDown,false) //not def
@@ -158,16 +182,17 @@ function update(source) {
   // Node circles start tiny and gray.
   nodeEnter.append("circle")
     .attr("r", 1e-6)
-    .style("fill", function(d) { return d.children ? "lightsteelblue": "#fff"; });
-    
+    .style("fill", function(d) { return d.children ? "lightsteelblue": "#fff"; })
+    .on("mousedown", function(event){handleMouseDown(event, this);});
   // Node text starts invisible.
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d.followWordObjs ? -10 : 10; })
       .attr("dy", ".35em")
-      .attr("text-anchor", function(d) { return d.chilredn || d.followWordObjs ? "end" : "start";})
+      .attr("text-anchor", function(d) { return d.children || d.followWordObjs ? "end" : "start";})
       .text(function(d) { return d.word; })
       .style("fill-opacity", 1e-6)
-      
+			.attr("class", "label")
+    	.on("mousedown", function(event){textMouseDown(event, this);})      
   // Transition nodes to new position.
   var nodeUpdate = node.transition()
       .duration(duration)
@@ -251,7 +276,7 @@ function handleEnterInWordFld(e) {
 
 // Handle mouse down events to distinguish between
 // left and middle button:
-function handleMouseDown(node) {
+function handleMouseDown(node, el) {
    //alert("Word: " + node.word);
    //alert("Button: " + this.event.which);
    if (this.event.which == 2)
@@ -259,6 +284,7 @@ function handleMouseDown(node) {
    else if (this.event.which == 1)
      toggle(node);
 }
+
 
 // Toggle children on node click.
 function toggle(d) {
@@ -272,7 +298,79 @@ function toggle(d) {
   }
   update(d);
 }
-    
+
+// Sean Code below
+// Class to handle a ticker.
+var ticker = function(id, tickerLength, wordDelimiter, maxChars) {
+	var el = d3.select("#" + id)
+		.style("width", tickerLength + "px");
+	
+	var t = {}, words = [],
+			content = "";
+
+	t.addWord = function(word) {
+		words.push(word);
+		content = words.join(wordDelimiter);
+		if (content.length > maxChars) {
+			words.shift();
+			content = words.join(wordDelimiter);
+		}
+		t.update();
+	};
+
+	t.update = function() {
+		el.attr("value", content);
+	}
+	t.update();
+	return t;
+};
+
+var wordTicker = ticker("ticker", 300, ' ', 100);
+
+// The color to use for selected labels.
+var fillColor = "blue";
+
+// Color the given label element.
+// el should be an svg text element
+function colorLabel(el, color) {
+	d3.select(el)
+		.style("fill", color);
+}
+
+// Color all labels.
+function colorAllLabels(color) {
+	d3.selectAll(".label")
+		.style("fill", color);
+}
+
+// On mouse down, color label, add word to ticker.
+function textMouseDown(node, el) {
+	colorLabel(el, fillColor);
+	addToTicker(node.word);
+}
+
+// Add a word to the ticker.
+function addToTicker(word) {
+	wordTicker.addWord(word);
+}
+
+// Handle change event on selection widget.
+function handleChange(select) {
+	addToTicker(select.value);
+}
+
+// Handlers for three buttons.
+function onCorrect() {
+	alert("THATS CORRECT");
+}
+ 
+function onIncorrect() {
+	alert("THATS INCORRECT");	
+}   
+
+function onRestart() {
+	alert("RESTART");
+}
     </script>
   </body>
 </html>
