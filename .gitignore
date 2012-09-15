@@ -9,3 +9,4 @@ doc/html/*\.tornado*
 doc/html/*\.python_qt_binding*
 src/echo_tree/Resources/EmailCollectingTest/
 src/echo_tree/Resources/EnronCollectionProcessed/
+src/echo_tree/Resources/AmericanNationalCorpus/
