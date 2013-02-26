@@ -30,7 +30,7 @@
      New word: <input type="text" name="newWord" id="newWord" 
 		      onkeydown="window.handleEnterInWordFld();" />
 
-     <button onclick="window.sendNewRootWord();">Get New Tree</button>
+     <button onclick="window.sendNewRootWordFromTxtFld();">Get New Tree</button>
     </div>
 		<select id="pulldown" onchange="handleChange(this);">
 			<option value="">Shortcuts:</option>
@@ -258,10 +258,16 @@ function update(source) {
 }
 
 
-// Given a word, tell browser to make
+// Take a word from the new word test field, and tell browser to make
 // that word into the new root.
-function sendNewRootWord() {
+function sendNewRootWordFromTxtFld() {
   word = document.getElementById("newWord").value;
+  sendNewRootWord(word);
+}
+
+// Given a word, tell browser to make that word into the 
+// new root:
+function sendNewRootWord(word) {
   ws.send(word);
 }
 
@@ -270,7 +276,7 @@ function sendNewRootWord() {
 function handleEnterInWordFld(e) {
     if (!e) { var e = window.event; }
     // Enter is pressed?
-    if (e.keyCode == 13) { sendNewRootWord(); }
+    if (e.keyCode == 13) { sendNewRootWordFromTxtFld(); }
 }
 
 
@@ -279,9 +285,9 @@ function handleEnterInWordFld(e) {
 function handleMouseDown(node, el) {
    //alert("Word: " + node.word);
    //alert("Button: " + this.event.which);
-   if (this.event.which == 2)
+   if (this.event.which == 1) // Left click
      ws.send(node.word);
-   else if (this.event.which == 1)
+   else if (this.event.which == 2) // Middle click
      toggle(node);
 }
 
