@@ -28,7 +28,10 @@ class WordDatabase(object):
         @type SQLiteDbPath: string
         '''
         self.dbPath = SQLiteDbPath;
-        self.conn   = sqlite3.connect(self.dbPath);
+        try:
+            self.conn   = sqlite3.connect(self.dbPath);
+        except Exception as e:
+            raise IOError(`e` + ": %s" % self.dbPath);
         
     def close(self):
         pass;
